@@ -1,0 +1,18 @@
+{
+  "name": "com.albertelias.xr-editor-controls",
+  "version": "1.0.0",
+  "displayName": "XR Editor Controls",
+  "description": "Test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard, no headset. Simulates one controller and head look through the XR Interaction Toolkit, so interactables need nothing added.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.xr.interaction.toolkit": "3.0.0",
+    "com.unity.inputsystem": "1.7.0",
+    "com.unity.ugui": "1.0.0"
+  },
+  "keywords": ["xr", "vr", "editor", "testing", "simulator", "xr interaction toolkit"],
+  "author": {
+    "name": "Albert Elias",
+    "url": "https://github.com/aje0827"
+  },
+  "license": "MIT"
+}

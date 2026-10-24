@@ -1,294 +1,115 @@
 // EditorTools-Unity editor controls: https://github.com/aje0827/EditorTools-Unity
 // Copied into a project? Change the original in this repo, not the copy.
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
-/// Reads mouse and keyboard for the editor controls in any project.
-/// Uses the new Input System when the project has it turned on,
-/// otherwise the old Input Manager. Nothing else in the controls touches input directly.
-public static class EditorControlsInput
+namespace XREditorControls
 {
-    public static Vector2 MousePosition
+    /// <summary>
+    /// The one place the editor controls read the mouse and keyboard (Unity's Input System, which the
+    /// XR Interaction Toolkit needs anyway). While a script drives <see cref="EditorScriptedPointer"/>,
+    /// its values are read instead of the real mouse.
+    /// </summary>
+    public static class EditorControlsInput
     {
-        get
+        static Mouse Mouse => Mouse.current;
+        static Keyboard Keys => Keyboard.current;
+        static bool Scripted => EditorScriptedPointer.Active;
+
+        public static Vector2 MousePosition
         {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.Position;
-#endif
-            // While looking, the pointer stays in the middle of the view. The real cursor
-            // does not lock until the first click, and that click was jumping the laser off the button.
-            if (EditorMouseRotationTester.IsLooking)
-                return new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null ? m.position.ReadValue() : Vector2.zero;
-#else
-            return Input.mousePosition;
-#endif
+            get
+            {
+                if (Scripted)
+                    return EditorScriptedPointer.Position;
+                // While looking, the pointer stays in the middle of the view. The real cursor does not
+                // lock until the first click, and that click was jumping the laser off the button.
+                if (EditorMouseRotationTester.IsLooking)
+                    return new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+                return Mouse != null ? Mouse.position.ReadValue() : Vector2.zero;
+            }
         }
-    }
 
-    public static bool LeftPressedThisFrame
-    {
-        get
+        public static bool LeftPressedThisFrame => Scripted ? EditorScriptedPointer.LeftPressed : Pressed(Mouse?.leftButton);
+        public static bool LeftReleasedThisFrame => Scripted ? EditorScriptedPointer.LeftReleased : Released(Mouse?.leftButton);
+        public static bool LeftHeld => Scripted ? EditorScriptedPointer.LeftHeld : Held(Mouse?.leftButton);
+
+        public static bool RightPressedThisFrame => Scripted ? EditorScriptedPointer.RightPressed : Pressed(Mouse?.rightButton);
+        public static bool RightReleasedThisFrame => Scripted ? EditorScriptedPointer.RightReleased : Released(Mouse?.rightButton);
+        public static bool RightHeld => Scripted ? EditorScriptedPointer.RightHeld : Held(Mouse?.rightButton);
+
+        // Command (either side) stands in for the controller's grip.
+        public static bool CommandPressedThisFrame => Scripted ? EditorScriptedPointer.CommandPressed : Pressed(Keys?.leftCommandKey) || Pressed(Keys?.rightCommandKey);
+        public static bool CommandReleasedThisFrame => Scripted ? EditorScriptedPointer.CommandReleased : Released(Keys?.leftCommandKey) || Released(Keys?.rightCommandKey);
+        public static bool CommandHeld => Scripted ? EditorScriptedPointer.CommandHeld : Held(Keys?.leftCommandKey) || Held(Keys?.rightCommandKey);
+
+        // Arrow keys stand in for the controller's thumbstick (left and right snap turn).
+        public static bool ArrowPressedThisFrame(KeyCode key) => Pressed(Arrow(key));
+        public static bool ArrowReleasedThisFrame(KeyCode key) => Released(Arrow(key));
+        public static bool ArrowHeld(KeyCode key) => Held(Arrow(key));
+
+        /// <summary>Mouse movement this frame, in the same units as the old "Mouse X" and "Mouse Y" axes (pixels × 0.1).</summary>
+        public static Vector2 MouseDelta
         {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.LeftPressed;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.leftButton.wasPressedThisFrame;
-#else
-            return Input.GetMouseButtonDown(0);
-#endif
+            get
+            {
+                if (Scripted)
+                    return EditorScriptedPointer.Delta;
+                return Mouse != null ? Mouse.delta.ReadValue() * 0.1f : Vector2.zero;
+            }
         }
-    }
 
-    public static bool LeftReleasedThisFrame
-    {
-        get
+        /// <summary>Wheel or trackpad scroll this frame. One notch is about 1. Positive is up.</summary>
+        public static float ScrollNotches
         {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.LeftReleased;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.leftButton.wasReleasedThisFrame;
-#else
-            return Input.GetMouseButtonUp(0);
-#endif
+            get
+            {
+                if (Scripted)
+                    return EditorScriptedPointer.Scroll;
+                if (Mouse == null)
+                    return 0f;
+                float y = Mouse.scroll.ReadValue().y;
+                // Some mice report 120 for one notch.
+                if (Mathf.Abs(y) >= 10f)
+                    y /= 120f;
+                return y;
+            }
         }
-    }
 
-    public static bool LeftHeld
-    {
-        get
+        public static bool KeyHeld(KeyCode key)
         {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.LeftHeld;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.leftButton.isPressed;
-#else
-            return Input.GetMouseButton(0);
-#endif
+            if (Keys == null)
+                return false;
+            switch (key)
+            {
+                case KeyCode.LeftAlt: return Keys.leftAltKey.isPressed;
+                case KeyCode.RightAlt: return Keys.rightAltKey.isPressed;
+                case KeyCode.LeftShift: return Keys.leftShiftKey.isPressed;
+                case KeyCode.RightShift: return Keys.rightShiftKey.isPressed;
+                case KeyCode.LeftControl: return Keys.leftCtrlKey.isPressed;
+                case KeyCode.LeftCommand: return Keys.leftCommandKey.isPressed;
+                case KeyCode.Space: return Keys.spaceKey.isPressed;
+                default: return false;
+            }
         }
-    }
 
-    public static bool RightHeld
-    {
-        get
+        static KeyControl Arrow(KeyCode key)
         {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.RightHeld;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.rightButton.isPressed;
-#else
-            return Input.GetMouseButton(1);
-#endif
+            if (Keys == null)
+                return null;
+            switch (key)
+            {
+                case KeyCode.UpArrow: return Keys.upArrowKey;
+                case KeyCode.DownArrow: return Keys.downArrowKey;
+                case KeyCode.LeftArrow: return Keys.leftArrowKey;
+                case KeyCode.RightArrow: return Keys.rightArrowKey;
+                default: return null;
+            }
         }
-    }
 
-    public static bool RightReleasedThisFrame
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.RightReleased;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.rightButton.wasReleasedThisFrame;
-#else
-            return Input.GetMouseButtonUp(1);
-#endif
-        }
-    }
-
-    public static bool RightPressedThisFrame
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.RightPressed;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null && m.rightButton.wasPressedThisFrame;
-#else
-            return Input.GetMouseButtonDown(1);
-#endif
-        }
-    }
-
-    // Command (either side) stands in for the controller's grip.
-    public static bool CommandHeld
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.CommandHeld;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var kb = UnityEngine.InputSystem.Keyboard.current;
-            return kb != null && (kb.leftCommandKey.isPressed || kb.rightCommandKey.isPressed);
-#else
-            return Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
-#endif
-        }
-    }
-
-    public static bool CommandPressedThisFrame
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.CommandPressed;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var kb = UnityEngine.InputSystem.Keyboard.current;
-            return kb != null && (kb.leftCommandKey.wasPressedThisFrame || kb.rightCommandKey.wasPressedThisFrame);
-#else
-            return Input.GetKeyDown(KeyCode.LeftCommand) || Input.GetKeyDown(KeyCode.RightCommand);
-#endif
-        }
-    }
-
-    public static bool CommandReleasedThisFrame
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.CommandReleased;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var kb = UnityEngine.InputSystem.Keyboard.current;
-            return kb != null && (kb.leftCommandKey.wasReleasedThisFrame || kb.rightCommandKey.wasReleasedThisFrame);
-#else
-            return Input.GetKeyUp(KeyCode.LeftCommand) || Input.GetKeyUp(KeyCode.RightCommand);
-#endif
-        }
-    }
-
-    // Arrow keys stand in for the controller's thumbstick (left and right snap turn).
-#if ENABLE_INPUT_SYSTEM
-    static UnityEngine.InputSystem.Controls.KeyControl Arrow(KeyCode key)
-    {
-        var kb = UnityEngine.InputSystem.Keyboard.current;
-        if (kb == null) return null;
-        switch (key)
-        {
-            case KeyCode.UpArrow: return kb.upArrowKey;
-            case KeyCode.DownArrow: return kb.downArrowKey;
-            case KeyCode.LeftArrow: return kb.leftArrowKey;
-            case KeyCode.RightArrow: return kb.rightArrowKey;
-            default: return null;
-        }
-    }
-#endif
-
-    public static bool ArrowHeld(KeyCode key)
-    {
-#if ENABLE_INPUT_SYSTEM
-        var k = Arrow(key);
-        return k != null && k.isPressed;
-#else
-        return Input.GetKey(key);
-#endif
-    }
-
-    public static bool ArrowPressedThisFrame(KeyCode key)
-    {
-#if ENABLE_INPUT_SYSTEM
-        var k = Arrow(key);
-        return k != null && k.wasPressedThisFrame;
-#else
-        return Input.GetKeyDown(key);
-#endif
-    }
-
-    public static bool ArrowReleasedThisFrame(KeyCode key)
-    {
-#if ENABLE_INPUT_SYSTEM
-        var k = Arrow(key);
-        return k != null && k.wasReleasedThisFrame;
-#else
-        return Input.GetKeyUp(key);
-#endif
-    }
-
-    /// Mouse movement this frame, in the same units as the old "Mouse X"/"Mouse Y" axes.
-    public static Vector2 MouseDelta
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.Delta;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            return m != null ? m.delta.ReadValue() * 0.1f : Vector2.zero;
-#else
-            return new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-#endif
-        }
-    }
-
-    /// Wheel or trackpad scroll this frame. One notch is about 1. Positive is up.
-    public static float ScrollNotches
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (EditorScriptedPointer.Active)
-                return EditorScriptedPointer.Scroll;
-#endif
-#if ENABLE_INPUT_SYSTEM
-            var m = UnityEngine.InputSystem.Mouse.current;
-            if (m == null) return 0f;
-            float y = m.scroll.ReadValue().y;
-#else
-            // The old axis reports about 0.1 for one wheel notch.
-            float y = Input.GetAxis("Mouse ScrollWheel") * 10f;
-#endif
-            // Some mice report 120 for one notch.
-            if (Mathf.Abs(y) >= 10f)
-                y /= 120f;
-            return y;
-        }
-    }
-
-    public static bool KeyHeld(KeyCode key)
-    {
-#if ENABLE_INPUT_SYSTEM
-        var kb = UnityEngine.InputSystem.Keyboard.current;
-        if (kb == null) return false;
-        switch (key)
-        {
-            case KeyCode.LeftAlt: return kb.leftAltKey.isPressed;
-            case KeyCode.RightAlt: return kb.rightAltKey.isPressed;
-            case KeyCode.LeftShift: return kb.leftShiftKey.isPressed;
-            case KeyCode.RightShift: return kb.rightShiftKey.isPressed;
-            case KeyCode.LeftControl: return kb.leftCtrlKey.isPressed;
-            case KeyCode.LeftCommand: return kb.leftCommandKey.isPressed;
-            case KeyCode.Space: return kb.spaceKey.isPressed;
-            default: return false;
-        }
-#else
-        return Input.GetKey(key);
-#endif
+        static bool Pressed(ButtonControl button) => button != null && button.wasPressedThisFrame;
+        static bool Released(ButtonControl button) => button != null && button.wasReleasedThisFrame;
+        static bool Held(ButtonControl button) => button != null && button.isPressed;
     }
 }
