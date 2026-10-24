@@ -1,0 +1,23 @@
+# Unity defaults
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# IDE / editor files
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+.vs/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
