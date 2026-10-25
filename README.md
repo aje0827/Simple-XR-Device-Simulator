@@ -8,7 +8,7 @@ A lightweight way to test an XR scene in the Unity Editor with a mouse or trackp
 |---|---|
 | ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
 
-**Try this scene yourself:** after installing, click **Tools > XR Editor Controls > Open Demo Scene** in Unity's menu, then press Play.
+**Try it:** after installing, open **Window > Package Manager**, select **XR Editor Controls**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
 
 I find Unity's XR Device Simulator hard to control, and it has far more inputs than I need to test in my apps. I built this to check small changes in the VR training apps I make without putting the headset on and off each time.
 
@@ -52,7 +52,7 @@ There's nothing to wire up. It finds the camera, the event system and the contro
 
 If Unity asks to enable the Input System's backends and restart, click Yes. The controls read the mouse and keyboard through it.
 
-To try it before adding it to your own scene, click **Tools > XR Editor Controls > Open Demo Scene**. It opens the XR Interaction Toolkit's own demo scene (importing its Starter Assets sample if you don't have it yet) with the controls added.
+To try it before adding it to your own scene, import the **Basic Scene** sample from the package's **Samples** tab. To try it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > XR Editor Controls > Open Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the controls.
 
 You can also copy the `Assets/EditorTools/EditorControls/` folder into your project instead.
 
