@@ -10,7 +10,7 @@ Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpa
 | ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
 
 
-**Try it:** after installing, open **Window > Package Manager**, select **Simple XR Device Simulator**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
+**Try it:** after installing, click **Tools > Simple XR Device Simulator > Open Basic Scene** and press Play. The controls are listed on a panel in the scene.
 
 Built for quick checks while developing XR apps. Press Play and the mouse becomes your controller. You can look around, click buttons, grab, rotate, scale and teleport.
 
@@ -62,7 +62,7 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 Then drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera, the event system and the controller on its own. It only runs in the Editor, so it has no effect on a headset build.
 
-To see it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > Simple XR Device Simulator > Open Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the prefab.
+To see it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > Simple XR Device Simulator > Open XR Interaction Toolkit Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the prefab.
 
 You can also copy the `Assets/EditorTools/EditorControls/` folder into your project.
 

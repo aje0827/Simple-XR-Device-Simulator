@@ -5,7 +5,8 @@ namespace XREditorControls.Sample
 {
     /// <summary>
     /// Gives an object the render pipeline's own default material and a color, so the sample looks right in the
-    /// Built-In pipeline, URP and HDRP without shipping a material for each.
+    /// Built-In pipeline, URP and HDRP from one scene. The material is set every time the object is enabled, so a
+    /// material saved from another pipeline is replaced.
     /// </summary>
     [ExecuteAlways]
     [RequireComponent(typeof(Renderer))]
@@ -16,17 +17,23 @@ namespace XREditorControls.Sample
         static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         static readonly int LegacyColor = Shader.PropertyToID("_Color");
 
+        static Material builtInMaterial;
+
         MaterialPropertyBlock block;
 
         void OnEnable()
         {
-            var r = GetComponent<Renderer>();
-            Material standard = GraphicsSettings.currentRenderPipeline != null
-                ? GraphicsSettings.currentRenderPipeline.defaultMaterial
-                : null;
-            if (standard != null)
-                r.sharedMaterial = standard;
+            GetComponent<Renderer>().sharedMaterial = DefaultMaterial();
             Apply();
+        }
+
+        static Material DefaultMaterial()
+        {
+            if (GraphicsSettings.currentRenderPipeline != null)
+                return GraphicsSettings.currentRenderPipeline.defaultMaterial;
+            if (builtInMaterial == null)
+                builtInMaterial = new Material(Shader.Find("Standard")) { hideFlags = HideFlags.DontSave };
+            return builtInMaterial;
         }
 
         public void SetColor(Color next)

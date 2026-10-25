@@ -10,16 +10,38 @@ using UnityEngine;
 namespace XREditorControls
 {
     /// <summary>
-    /// One menu item that opens the scene from the README's GIFs: the XR Interaction Toolkit's own demo scene
-    /// (from its Starter Assets sample, imported if it isn't yet) with the editor controls added.
+    /// Menu items that open a scene to try the controls in: this package's Basic Scene sample, and the scene from
+    /// the README's GIFs, the XR Interaction Toolkit's own demo scene with the prefab added. Each imports its
+    /// sample first if it isn't imported yet.
     /// </summary>
     internal static class OpenDemoScene
     {
         const string ToolkitPackage = "com.unity.xr.interaction.toolkit";
+        const string ThisPackage = "com.albertelias.simple-xr-device-simulator";
         const string ControlsPrefab = "Packages/com.albertelias.simple-xr-device-simulator/Simple XR Device Simulator.prefab";
         const string ControlsPrefabCopied = "Assets/EditorTools/EditorControls/Simple XR Device Simulator.prefab";
 
-        [MenuItem("Tools/Simple XR Device Simulator/Open Demo Scene")]
+        [MenuItem("Tools/Simple XR Device Simulator/Open Basic Scene", priority = 0)]
+        static void OpenBasicScene()
+        {
+            foreach (Sample sample in Sample.FindByPackage(ThisPackage, null))
+            {
+                if (sample.displayName != "Basic Scene")
+                    continue;
+                if (!sample.isImported)
+                {
+                    sample.Import();
+                    AssetDatabase.Refresh();
+                }
+                string scenePath = ToProjectPath(Path.Combine(sample.importPath, "Basic Scene.unity"));
+                if (File.Exists(scenePath) && EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                    EditorSceneManager.OpenScene(scenePath);
+                return;
+            }
+            EditorUtility.DisplayDialog("Simple XR Device Simulator", "The Basic Scene sample is only there when the package is installed through Package Manager.", "OK");
+        }
+
+        [MenuItem("Tools/Simple XR Device Simulator/Open XR Interaction Toolkit Demo Scene", priority = 1)]
         static void Open()
         {
             Sample starterAssets = default;
