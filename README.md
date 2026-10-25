@@ -2,7 +2,7 @@
 
 Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpad and a keyboard.
 
-![Grabbing a cylinder with Command and turning it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
+![Grabbing a cylinder with Command and rotating it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
 
 
 | Look around and teleport                                                                       | Scale what you're holding                                          |
@@ -61,8 +61,6 @@ https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/EditorTool
 If Unity asks to enable the Input System's backends and restart, click Yes. The package reads the mouse and keyboard through it.
 
 Then drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera, the event system and the controller on its own. It only runs in the Editor, so it has no effect on a headset build.
-
-To see it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > Simple XR Device Simulator > Open XR Interaction Toolkit Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the prefab.
 
 You can also copy the `Assets/EditorTools/EditorControls/` folder into your project.
 
