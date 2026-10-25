@@ -146,6 +146,10 @@ namespace XREditorControls
                 return "←  Turn left";
             if (EditorControlsInput.ArrowHeld(KeyCode.RightArrow))
                 return "→  Turn right";
+            if (EditorControlsInput.PrimaryButtonHeld)
+                return "1  A button";
+            if (EditorControlsInput.SecondaryButtonHeld)
+                return "2  B button";
             return null;
         }
 

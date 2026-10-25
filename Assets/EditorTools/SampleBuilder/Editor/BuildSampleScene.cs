@@ -57,6 +57,11 @@ static class BuildSampleScene
         var camera = cameraObject.AddComponent<Camera>();
         camera.nearClipPlane = 0.01f;
         cameraObject.AddComponent<AudioListener>();
+        // Moves the camera with the headset. Without it a headset can't look around, and the XR Origin warns on Play.
+        var head = cameraObject.AddComponent<UnityEngine.InputSystem.XR.TrackedPoseDriver>();
+        head.positionInput = new UnityEngine.InputSystem.InputActionProperty(new UnityEngine.InputSystem.InputAction("Head Position", binding: "<XRHMD>/centerEyePosition", expectedControlType: "Vector3"));
+        head.rotationInput = new UnityEngine.InputSystem.InputActionProperty(new UnityEngine.InputSystem.InputAction("Head Rotation", binding: "<XRHMD>/centerEyeRotation", expectedControlType: "Quaternion"));
+        head.trackingStateInput = new UnityEngine.InputSystem.InputActionProperty(new UnityEngine.InputSystem.InputAction("Head Tracking State", binding: "<XRHMD>/trackingState", expectedControlType: "Integer"));
         origin.Camera = camera;
         origin.CameraFloorOffsetObject = offset;
         origin.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.Device;
@@ -80,7 +85,9 @@ static class BuildSampleScene
         var body = cube.AddComponent<Rigidbody>();
         body.useGravity = false;
         body.isKinematic = true;
-        cube.AddComponent<XRGrabInteractable>();
+        // A kinematic cube can't be thrown; without this, every drop warns in the Console.
+        cube.AddComponent<XRGrabInteractable>().throwOnDetach = false;
+        cube.AddComponent<SampleFaceButtons>();
         var transformer = cube.AddComponent<XRGeneralGrabTransformer>();
         transformer.clampScaling = true;
         transformer.minimumScaleRatio = 0.25f;
@@ -117,10 +124,12 @@ static class BuildSampleScene
             { "Scale it", "Command / Windows + scroll" },
             { "Teleport", "Hold right click, release" },
             { "Snap turn", "Left / Right arrows" },
+            { "A button (lights the cube)", "1" },
+            { "B button (hides the cube)", "2" },
         };
         for (int i = 0; i < help.GetLength(0); i++)
         {
-            float y = 170f - 38f * i;
+            float y = 200f - 34f * i;
             Label(panel.transform, "Does " + i, help[i, 0], 24, new Vector2(-220f, y), new Vector2(290f, 36f)).alignment = TextAnchor.MiddleLeft;
             var keys = Label(panel.transform, "Keys " + i, help[i, 1], 24, new Vector2(175f, y), new Vector2(440f, 36f));
             keys.alignment = TextAnchor.MiddleLeft;

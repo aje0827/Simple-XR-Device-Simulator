@@ -24,6 +24,8 @@ namespace XREditorControls
         public static bool ControlHeld;
         public static bool CommandPressed;
         public static bool CommandReleased;
+        public static bool PrimaryHeld;
+        public static bool SecondaryHeld;
 
         public static void Clear()
         {
@@ -40,6 +42,8 @@ namespace XREditorControls
             ControlHeld = false;
             CommandPressed = false;
             CommandReleased = false;
+            PrimaryHeld = false;
+            SecondaryHeld = false;
         }
     }
 }

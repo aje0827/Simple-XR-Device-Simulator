@@ -36,6 +36,8 @@ namespace XREditorControls.Sample
             return builtInMaterial;
         }
 
+        public Color Color => color;
+
         public void SetColor(Color next)
         {
             color = next;
