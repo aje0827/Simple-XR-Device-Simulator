@@ -4,9 +4,11 @@ Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpa
 
 ![Grabbing a cylinder with Command and turning it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
 
-| Look around and teleport | Scale what you're holding |
-|---|---|
+
+| Look around and teleport                                                                       | Scale what you're holding                                          |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
+
 
 **Try it:** after installing, open **Window > Package Manager**, select **Simple XR Device Simulator**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
 
@@ -19,24 +21,30 @@ It works with the XR Interaction Toolkit interactables and UI already in your sc
 - XR Interaction Toolkit scenes with an XR Origin rig.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
 
+
+
 ## Not supported
 
 - Other rigs, like Meta's Interaction SDK.
 - A second controller, hand tracking and climbing. For those, use Unity's XR Device Simulator.
 
+
+
 ## Controls
 
 The mouse points the controller. A laser shows where it's pointing, and hover highlights show up as they do in the headset.
 
-| Action | Keys | Same as in the headset |
-|---|---|---|
-| Look around | Hold Option / Alt and move the mouse | Turning your head |
-| Trigger | Left click | Trigger: press buttons and interactables |
-| Grab | Hold Command / Windows | Grip: the object follows the mouse, let go to drop it |
-| Rotate | Command / Windows + Control + move the mouse | Turning your wrist. Add Shift to roll |
-| Scale | Command / Windows + scroll | Two-handed scale, within the limits set on the object's grab transformer |
-| Teleport | Hold right click, then release | Thumbstick forward. The arc turns red where you can't land |
-| Snap turn | Left / Right arrow keys | Thumbstick left / right |
+
+| Action      | Keys                                         | Same as in the headset                                                   |
+| ----------- | -------------------------------------------- | ------------------------------------------------------------------------ |
+| Look around | Hold Option / Alt and move the mouse         | Turning your head                                                        |
+| Trigger     | Left click                                   | Trigger: press buttons and interactables                                 |
+| Grab        | Hold Command / Windows                       | Grip: the object follows the mouse, let go to drop it                    |
+| Rotate      | Command / Windows + Control + move the mouse | Turning your wrist. Add Shift to roll                                    |
+| Scale       | Command / Windows + scroll                   | Two-handed scale, within the limits set on the object's grab transformer |
+| Teleport    | Hold right click, then release               | Thumbstick forward. The arc turns red where you can't land               |
+| Snap turn   | Left / Right arrow keys                      | Thumbstick left / right                                                  |
+
 
 On a Mac trackpad, a two-finger click is the right click and a two-finger swipe is the scroll. Other trackpads haven't been tested.
 
@@ -65,25 +73,3 @@ You can also copy the `Assets/EditorTools/EditorControls/` folder into your proj
 - The Input System (the XR Interaction Toolkit needs it too)
 - Built and tested on macOS. On Windows, the Windows key takes the place of Command. Windows hasn't been tested yet
 
-## What's inside
-
-One script per job, all in the `XREditorControls` namespace:
-
-| File | Job |
-|---|---|
-| `EditorMouseClickTester.cs` | The component on the prefab. Holds the settings and runs the parts below each frame |
-| `MousePointer.cs` | Aims the controller's ray from the camera through the cursor |
-| `MouseUiClick.cs` | Clicks UI. A click counts on release, on the same button, like a controller's trigger |
-| `MouseWorldClick.cs` | Clicks 3D interactables through the XR Interaction Manager |
-| `MouseGrab.cs` | Grab, rotate and scale, through the toolkit's own grab |
-| `MouseLocomotion.cs` | Teleport and snap turn |
-| `MouseLaser.cs` | The laser and teleport arc you see in the Game view |
-| `EditorMouseRotationTester.cs` | Look around. UI clicks are off while you look, so turning your head never clicks anything |
-| `EditorControlsInput.cs` | Reads the mouse and keyboard through the Input System |
-| `EditorScriptedPointer.cs`, `ScriptedMouseClick.cs` | Let a script move the pointer or click, for automated UI tests |
-
-An object that isn't an XR Interaction Toolkit interactable can still take clicks by implementing `IClickable` (add `using XREditorControls;`).
-
-## License
-
-MIT. See [LICENSE](LICENSE).
