@@ -110,7 +110,7 @@ namespace XREditorControls
                 if (ownMouseInteractor != null)
                     return ownMouseInteractor;
                 // Not parented, so no scale above it can stretch what it grabs.
-                ownMouseInteractor = new GameObject("~EditorMouseInteractor").AddComponent<XRRayInteractor>();
+                ownMouseInteractor = new GameObject("Simple XR Device Simulator Pointer").AddComponent<XRRayInteractor>();
                 ownMouseInteractor.useForceGrab = false; // grabbed things stay where they are, like a far grab
                 // Grabbing only. UI clicks go through the UI clicker; a 3D select here could block later panel clicks.
                 ownMouseInteractor.enableUIInteraction = false;
@@ -136,7 +136,7 @@ namespace XREditorControls
             {
                 if (ownArcInteractor == null)
                 {
-                    ownArcInteractor = new GameObject("~EditorArcInteractor").AddComponent<XRRayInteractor>();
+                    ownArcInteractor = new GameObject("Simple XR Device Simulator Teleport Arc").AddComponent<XRRayInteractor>();
                     ownArcInteractor.raycastMask = 0;
                 }
                 return ownArcInteractor;

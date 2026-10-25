@@ -120,7 +120,7 @@ namespace XREditorControls
                 shader = Shader.Find("Unlit/Color");
             var material = new Material(shader);
 
-            var laserObject = new GameObject("~EditorLaser");
+            var laserObject = new GameObject("Simple XR Device Simulator Laser");
             laserObject.transform.SetParent(owner.transform, false);
             line = laserObject.AddComponent<LineRenderer>();
             line.useWorldSpace = true;
@@ -132,7 +132,7 @@ namespace XREditorControls
             line.receiveShadows = false;
 
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.name = "~EditorLaserDot";
+            sphere.name = "Simple XR Device Simulator Laser Dot";
             Object.Destroy(sphere.GetComponent<Collider>()); // never blocks clicks
             sphere.transform.SetParent(owner.transform, false);
             dotRenderer = sphere.GetComponent<Renderer>();
