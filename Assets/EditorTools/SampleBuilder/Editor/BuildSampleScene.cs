@@ -73,9 +73,9 @@ static class BuildSampleScene
         Child(locomotion, "Teleportation").AddComponent<TeleportationProvider>();
         Child(locomotion, "Snap Turn").AddComponent<SnapTurnProvider>();
 
-        // A table with a cube to grab and a hotspot to click.
+        // A table with a cube to grab.
         Shape(PrimitiveType.Cube, "Table", new Vector3(0f, 0.375f, 1.9f), new Vector3(1.4f, 0.75f, 0.7f), new Color(0.42f, 0.33f, 0.25f));
-        var cube = Shape(PrimitiveType.Cube, "Grab Cube", new Vector3(-0.3f, 0.85f, 1.9f), Vector3.one * 0.2f, Color.white);
+        var cube = Shape(PrimitiveType.Cube, "Grab Cube", new Vector3(0f, 0.85f, 1.9f), Vector3.one * 0.2f, new Color(0.95f, 0.6f, 0.2f));
         var body = cube.AddComponent<Rigidbody>();
         body.useGravity = false;
         body.isKinematic = true;
@@ -84,8 +84,6 @@ static class BuildSampleScene
         transformer.clampScaling = true;
         transformer.minimumScaleRatio = 0.25f;
         transformer.maximumScaleRatio = 4f;
-        var hotspot = Shape(PrimitiveType.Sphere, "Hotspot", new Vector3(0.35f, 0.87f, 1.9f), Vector3.one * 0.24f, Color.white);
-        var simple = hotspot.AddComponent<XRSimpleInteractable>();
 
         // Two spots beside the table, and one where you start so you can come back.
         Pad("Teleport Spot Left", new Vector3(-1.4f, 0.01f, 2.1f), 90f);
@@ -106,31 +104,23 @@ static class BuildSampleScene
         rect.localScale = Vector3.one * 0.002f;
         panel.AddComponent<Image>().color = new Color(0.1f, 0.11f, 0.14f, 0.92f);
 
-        Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 110f), new Vector2(560f, 60f));
-        var status = Label(panel.transform, "Status", "Click a button, or the ball on the table", 26, new Vector2(0f, -110f), new Vector2(560f, 50f));
+        Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 100f), new Vector2(560f, 60f));
+        Label(panel.transform, "Hint", "Grab the cube with Command, then click Reset", 26, new Vector2(0f, 40f), new Vector2(560f, 50f));
 
         var actions = panel.AddComponent<SampleActions>();
         var so = new SerializedObject(actions);
-        so.FindProperty("cube").objectReferenceValue = cube.GetComponent<SampleColors>();
-        so.FindProperty("hotspot").objectReferenceValue = hotspot.GetComponent<SampleColors>();
-        so.FindProperty("status").objectReferenceValue = status;
+        so.FindProperty("cube").objectReferenceValue = cube.transform;
         so.ApplyModifiedPropertiesWithoutUndo();
 
-        string[] names = { "Red", "Blue", "Green" };
-        Color[] colors = { new Color(0.9f, 0.3f, 0.3f), new Color(0.3f, 0.6f, 0.95f), new Color(0.35f, 0.8f, 0.45f) };
-        for (int i = 0; i < names.Length; i++)
-        {
-            var buttonObject = new GameObject(names[i] + " Button", typeof(RectTransform));
-            buttonObject.transform.SetParent(panel.transform, false);
-            buttonObject.AddComponent<Image>().color = colors[i];
-            var button = buttonObject.AddComponent<Button>();
-            var r = buttonObject.GetComponent<RectTransform>();
-            r.sizeDelta = new Vector2(160f, 90f);
-            r.anchoredPosition = new Vector2(-180f + 180f * i, 0f);
-            Label(buttonObject.transform, "Label", names[i], 34, Vector2.zero, new Vector2(160f, 90f));
-            UnityEventTools.AddIntPersistentListener(button.onClick, actions.SetCubeColor, i);
-        }
-        UnityEventTools.AddVoidPersistentListener(simple.selectEntered, actions.ToggleHotspot);
+        var buttonObject = new GameObject("Reset Button", typeof(RectTransform));
+        buttonObject.transform.SetParent(panel.transform, false);
+        buttonObject.AddComponent<Image>().color = new Color(0.3f, 0.6f, 0.95f);
+        var button = buttonObject.AddComponent<Button>();
+        var r = buttonObject.GetComponent<RectTransform>();
+        r.sizeDelta = new Vector2(220f, 90f);
+        r.anchoredPosition = new Vector2(0f, -70f);
+        Label(buttonObject.transform, "Label", "Reset", 34, Vector2.zero, new Vector2(220f, 90f));
+        UnityEventTools.AddPersistentListener(button.onClick, actions.ResetCube);
 
         var controls = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(ControlsPrefab));
         controls.GetComponent<EditorMouseClickTester>().showInputLabel = true;
