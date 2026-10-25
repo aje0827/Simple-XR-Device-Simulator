@@ -1,8 +1,8 @@
 {
-  "name": "com.albertelias.xr-editor-controls",
+  "name": "com.albertelias.simple-xr-device-simulator",
   "version": "1.0.0",
-  "displayName": "XR Editor Controls",
-  "description": "Test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard, no headset. Simulates one controller and head look through the XR Interaction Toolkit, so interactables need nothing added.",
+  "displayName": "Simple XR Device Simulator",
+  "description": "Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpad and a keyboard. The mouse acts as one controller and works with the interactables and UI already in your scene.",
   "unity": "2022.3",
   "dependencies": {
     "com.unity.xr.interaction.toolkit": "3.0.0",

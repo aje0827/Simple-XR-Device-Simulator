@@ -1,4 +1,4 @@
-// EditorTools-Unity editor controls: https://github.com/aje0827/EditorTools-Unity
+// Simple XR Device Simulator: https://github.com/aje0827/Simple-XR-Device-Simulator
 // Copied into a project? Change the original in this repo, not the copy.
 using UnityEngine;
 using UnityEngine.EventSystems;

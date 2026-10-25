@@ -1,4 +1,4 @@
-// EditorTools-Unity editor controls: https://github.com/aje0827/EditorTools-Unity
+// Simple XR Device Simulator: https://github.com/aje0827/Simple-XR-Device-Simulator
 // Copied into a project? Change the original in this repo, not the copy.
 #if UNITY_EDITOR
 using System.IO;
@@ -16,10 +16,10 @@ namespace XREditorControls
     internal static class OpenDemoScene
     {
         const string ToolkitPackage = "com.unity.xr.interaction.toolkit";
-        const string ControlsPrefab = "Packages/com.albertelias.xr-editor-controls/~EditorControls.prefab";
-        const string ControlsPrefabCopied = "Assets/EditorTools/EditorControls/~EditorControls.prefab";
+        const string ControlsPrefab = "Packages/com.albertelias.simple-xr-device-simulator/Simple XR Device Simulator.prefab";
+        const string ControlsPrefabCopied = "Assets/EditorTools/EditorControls/Simple XR Device Simulator.prefab";
 
-        [MenuItem("Tools/XR Editor Controls/Open Demo Scene")]
+        [MenuItem("Tools/Simple XR Device Simulator/Open Demo Scene")]
         static void Open()
         {
             Sample starterAssets = default;
@@ -35,13 +35,13 @@ namespace XREditorControls
             }
             if (!found)
             {
-                EditorUtility.DisplayDialog("XR Editor Controls", "Couldn't find the XR Interaction Toolkit's Starter Assets sample.", "OK");
+                EditorUtility.DisplayDialog("Simple XR Device Simulator", "Couldn't find the XR Interaction Toolkit's Starter Assets sample.", "OK");
                 return;
             }
 
             if (!starterAssets.isImported)
             {
-                if (!EditorUtility.DisplayDialog("XR Editor Controls",
+                if (!EditorUtility.DisplayDialog("Simple XR Device Simulator",
                         "The demo is the XR Interaction Toolkit's own DemoScene, from its Starter Assets sample. Import Starter Assets now?",
                         "Import", "Cancel"))
                     return;
@@ -52,7 +52,7 @@ namespace XREditorControls
             string scenePath = ToProjectPath(Path.Combine(starterAssets.importPath, "DemoScene.unity"));
             if (!File.Exists(scenePath))
             {
-                EditorUtility.DisplayDialog("XR Editor Controls", "Starter Assets is imported, but DemoScene wasn't found at " + scenePath, "OK");
+                EditorUtility.DisplayDialog("Simple XR Device Simulator", "Starter Assets is imported, but DemoScene wasn't found at " + scenePath, "OK");
                 return;
             }
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
