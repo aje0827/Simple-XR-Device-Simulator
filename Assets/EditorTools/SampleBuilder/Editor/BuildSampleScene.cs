@@ -99,13 +99,33 @@ static class BuildSampleScene
         panel.AddComponent<GraphicRaycaster>();
         panel.AddComponent<TrackedDeviceGraphicRaycaster>();
         var rect = panel.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(600f, 320f);
+        rect.sizeDelta = new Vector2(680f, 600f);
         rect.position = new Vector3(0f, 1.55f, 2.5f);
         rect.localScale = Vector3.one * 0.002f;
         panel.AddComponent<Image>().color = new Color(0.1f, 0.11f, 0.14f, 0.92f);
 
-        Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 100f), new Vector2(560f, 60f));
-        Label(panel.transform, "Hint", "Grab the cube with Command, then click Reset", 26, new Vector2(0f, 40f), new Vector2(560f, 50f));
+        Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 250f), new Vector2(640f, 60f));
+
+        // The controls, keys on the left and what they do on the right.
+        string[,] help =
+        {
+            { "Move the mouse", "Point" },
+            { "Click", "Press buttons" },
+            { "Hold Option + move", "Look around" },
+            { "Hold Command", "Grab" },
+            { "Command + Control + move", "Turn (add Shift to roll)" },
+            { "Command + scroll", "Scale" },
+            { "Hold right click, release", "Teleport" },
+            { "Left / Right arrows", "Snap turn" },
+        };
+        for (int i = 0; i < help.GetLength(0); i++)
+        {
+            float y = 180f - 38f * i;
+            Label(panel.transform, "Keys " + i, help[i, 0], 24, new Vector2(-150f, y), new Vector2(300f, 36f)).alignment = TextAnchor.MiddleRight;
+            Label(panel.transform, "Does " + i, help[i, 1], 24, new Vector2(170f, y), new Vector2(300f, 36f)).alignment = TextAnchor.MiddleLeft;
+        }
+
+        Label(panel.transform, "Hint", "Grab the cube, then click Reset to put it back", 26, new Vector2(0f, -150f), new Vector2(640f, 50f));
 
         var actions = panel.AddComponent<SampleActions>();
         var so = new SerializedObject(actions);
@@ -118,7 +138,7 @@ static class BuildSampleScene
         var button = buttonObject.AddComponent<Button>();
         var r = buttonObject.GetComponent<RectTransform>();
         r.sizeDelta = new Vector2(220f, 90f);
-        r.anchoredPosition = new Vector2(0f, -70f);
+        r.anchoredPosition = new Vector2(0f, -225f);
         Label(buttonObject.transform, "Label", "Reset", 34, Vector2.zero, new Vector2(220f, 90f));
         UnityEventTools.AddPersistentListener(button.onClick, actions.ResetCube);
 
