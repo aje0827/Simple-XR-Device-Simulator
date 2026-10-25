@@ -14,11 +14,11 @@ Built for quick checks while developing XR apps. Press Play and the mouse become
 
 It works with the XR Interaction Toolkit interactables and UI already in your scene. They respond the same way they do to a real controller, so you can test them as they are.
 
-## What it works with
+## What it supports
 
-- Scenes built with the XR Interaction Toolkit and its XR Origin rig. Other rigs, like Meta's Interaction SDK, aren't supported.
-- One controller. Actions that take two hands in the headset get a key instead. Scaling, for example, is Command + scroll.
-- For a second controller, hand tracking or climbing, use Unity's XR Device Simulator.
+- XR Interaction Toolkit scenes with an XR Origin rig. Other rigs, like Meta's Interaction SDK, aren't supported.
+- One controller. Actions that take two hands in the headset, like scaling, get a key instead.
+- A second controller, hand tracking and climbing aren't supported. Unity's XR Device Simulator covers those.
 
 ## Controls
 
