@@ -1,6 +1,6 @@
 // Builds the package's "Basic Scene" sample. Not part of the package: it lives outside EditorControls.
-// Run Tools > XR Editor Controls > Build Sample Scene, then move Assets/XREditorControlsSample into
-// Assets/EditorTools/EditorControls/Samples~/Basic Scene (with its .meta files).
+// Run Tools > XR Editor Controls > Build Sample Scene. It saves the scene in Assets/XREditorControlsSample and
+// copies that folder, .meta files included, into the package's Samples~/Basic Scene for the Samples tab.
 using UnityEditor;
 using UnityEditor.Events;
 using UnityEditor.SceneManagement;
@@ -22,6 +22,7 @@ using XREditorControls.Sample;
 static class BuildSampleScene
 {
     const string Folder = "Assets/XREditorControlsSample";
+    const string PackageSample = "Assets/EditorTools/EditorControls/Samples~/Basic Scene";
     const string ControlsPrefab = "Assets/EditorTools/EditorControls/~EditorControls.prefab";
 
     static Material defaultMaterial;
@@ -147,7 +148,17 @@ static class BuildSampleScene
         controls.GetComponent<EditorMouseClickTester>().showInputLabel = true;
 
         EditorSceneManager.SaveScene(scene, Folder + "/Basic Scene.unity");
-        Debug.Log("Saved " + Folder + "/Basic Scene.unity");
+        CopyToPackage();
+        Debug.Log("Saved " + Folder + "/Basic Scene.unity and copied it to " + PackageSample);
+    }
+
+    static void CopyToPackage()
+    {
+        if (System.IO.Directory.Exists(PackageSample))
+            System.IO.Directory.Delete(PackageSample, true);
+        System.IO.Directory.CreateDirectory(PackageSample);
+        foreach (var file in System.IO.Directory.GetFiles(Folder))
+            System.IO.File.Copy(file, System.IO.Path.Combine(PackageSample, System.IO.Path.GetFileName(file)));
     }
 
     static GameObject Child(GameObject parent, string name)

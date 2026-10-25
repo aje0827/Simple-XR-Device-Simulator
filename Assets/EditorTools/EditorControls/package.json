@@ -14,5 +14,12 @@
     "name": "Albert Elias",
     "url": "https://github.com/aje0827"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "samples": [
+    {
+      "displayName": "Basic Scene",
+      "description": "A table, a cube to grab, a Reset button and three teleport spots, with the controls already in the scene and listed on a panel. Open the scene and press Play.",
+      "path": "Samples~/Basic Scene"
+    }
+  ]
 }
