@@ -23,12 +23,27 @@ namespace XREditorControls
             {
                 if (Scripted)
                     return EditorScriptedPointer.Position;
+                // While a held object turns, the cursor is locked and the pointer stays where the turn started.
+                if (PinnedPosition.HasValue)
+                    return PinnedPosition.Value;
                 // While looking, the pointer stays in the middle of the view. The real cursor does not
                 // lock until the first click, and that click was jumping the laser off the button.
                 if (EditorMouseRotationTester.IsLooking)
                     return new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
                 return Mouse != null ? Mouse.position.ReadValue() : Vector2.zero;
             }
+        }
+
+        /// <summary>When set, the pointer reads this point instead of the cursor.</summary>
+        public static Vector2? PinnedPosition { get; set; }
+
+        /// <summary>Moves the cursor to a point in the Game view, or the scripted pointer while a script drives it.</summary>
+        public static void WarpMouse(Vector2 position)
+        {
+            if (Scripted)
+                EditorScriptedPointer.Position = position;
+            else
+                Mouse?.WarpCursorPosition(position);
         }
 
         public static bool LeftPressedThisFrame => Scripted ? EditorScriptedPointer.LeftPressed : Pressed(Mouse?.leftButton);
@@ -43,6 +58,9 @@ namespace XREditorControls
         public static bool CommandPressedThisFrame => Scripted ? EditorScriptedPointer.CommandPressed : Pressed(Keys?.leftCommandKey) || Pressed(Keys?.rightCommandKey);
         public static bool CommandReleasedThisFrame => Scripted ? EditorScriptedPointer.CommandReleased : Released(Keys?.leftCommandKey) || Released(Keys?.rightCommandKey);
         public static bool CommandHeld => Scripted ? EditorScriptedPointer.CommandHeld : Held(Keys?.leftCommandKey) || Held(Keys?.rightCommandKey);
+
+        // Control, added to the grip, turns the held object.
+        public static bool ControlHeld => Scripted ? EditorScriptedPointer.ControlHeld : Held(Keys?.leftCtrlKey) || Held(Keys?.rightCtrlKey);
 
         // Arrow keys stand in for the controller's thumbstick (left and right snap turn).
         public static bool ArrowPressedThisFrame(KeyCode key) => Pressed(Arrow(key));

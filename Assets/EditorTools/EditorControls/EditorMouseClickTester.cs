@@ -22,7 +22,7 @@ namespace XREditorControls
         [Header("Settings")]
         public bool enableMouseTesting = true;
 
-        [Tooltip("Degrees a held object turns per pixel of mouse movement while Command and the right mouse button are held. Left and right spin it. Up and down tilt it.")]
+        [Tooltip("Degrees a held object turns per pixel of mouse movement while Command and Control are held. Left and right spin it. Up and down tilt it. Add Shift to roll it.")]
         public float grabTurnSpeed = 0.3f;
 
         [Tooltip("How much a held object grows or shrinks per scroll notch while Command is held. 0.1 is 10 percent. It stays inside the min and max on the object's XR General Grab Transformer.")]
@@ -58,6 +58,10 @@ namespace XREditorControls
         [Tooltip("Leave empty to use the rig's controller ray, or the controls' own pointer when the controllers are off.")]
         public XRBaseInteractor clickRayInteractor;
 
+        [Header("Recording")]
+        [Tooltip("Show which control is in use, like \"⌘ Grab\", in the corner of the Game view. For demos and screen recordings.")]
+        public bool showInputLabel = false;
+
         [Header("Debug")]
         [Tooltip("Write each world click, grab and teleport to the Console.")]
         public bool logWorldHits = false;
@@ -74,6 +78,7 @@ namespace XREditorControls
         MouseGrab grab;
         MouseLocomotion locomotion;
         MouseLaser laser;
+        MouseInputLabel inputLabel;
 
         bool buttonDown;
         bool gazeSelectStopped;
@@ -88,7 +93,7 @@ namespace XREditorControls
 #endif
         }
 
-        /// <summary>True while Command is still holding this object, including while the right button turns it.</summary>
+        /// <summary>True while Command is still holding this object, including while Control turns it.</summary>
         public bool IsHolding(IXRSelectInteractable target)
         {
 #if UNITY_EDITOR
@@ -142,13 +147,14 @@ namespace XREditorControls
             if (eventSystem == null)
                 eventSystem = FindAnyObjectByType<EventSystem>();
 
-            pointer = new MousePointer(mainCamera, clickRayInteractor);
+            pointer = new MousePointer(mainCamera, clickRayInteractor) { HandOffset = laserHandOffset };
             clickRayInteractor = pointer.ClickInteractor;
             ui = new MouseUiClick(this, eventSystem, mainCamera);
             locomotion = new MouseLocomotion(this, pointer);
             world = new MouseWorldClick(this, pointer, locomotion);
             grab = new MouseGrab(this, pointer);
             laser = new MouseLaser(this, pointer, ui, locomotion, grab);
+            inputLabel = new MouseInputLabel(grab);
 
             ui.TakeMouseOffUiModules();
             EditorScriptedPointer.Clear();
@@ -176,13 +182,16 @@ namespace XREditorControls
                 laser.UpdateColor(buttonDown);
 
             // The controls' own pointer follows the mouse, so things react to hover as they do with a controller.
-            // While the right button turns a held object, it stays put so the mouse doesn't also slide the object.
-            if (grab.Held == null || !EditorControlsInput.RightHeld)
+            // While Control turns a held object, it stays put so the mouse doesn't also slide the object.
+            if (!grab.HoldsAim)
                 pointer.Aim();
             ui.Update();
 
             grab.Update();
-            locomotion.Update(grab.TakeRightClickWasTurn());
+            locomotion.Update(grab.Held != null);
+
+            if (showInputLabel)
+                inputLabel.Update();
 
             if (EditorControlsInput.LeftReleasedThisFrame)
             {
@@ -205,6 +214,12 @@ namespace XREditorControls
                 return;
             }
             laser.Draw();
+        }
+
+        void OnGUI()
+        {
+            if (showInputLabel && enableMouseTesting)
+                inputLabel?.Draw();
         }
 
         void OnDestroy()

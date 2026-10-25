@@ -179,6 +179,13 @@ namespace XREditorControls
                 yield break;
             if (Time.unscaledTime >= nextRaycasterRefresh)
             {
+                // A panel built for the headset may only have the controller's raycaster, which the mouse can't use.
+                // Give it the standard one for this Play session; the headset still uses its own.
+                foreach (TrackedDeviceGraphicRaycaster tracked in Object.FindObjectsByType<TrackedDeviceGraphicRaycaster>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (tracked.GetComponent<GraphicRaycaster>() == null)
+                        tracked.gameObject.AddComponent<GraphicRaycaster>();
+                }
                 // Include panels that are off right now; a choice panel that switches on later must still be clickable.
                 raycasters = Object.FindObjectsByType<GraphicRaycaster>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 nextRaycasterRefresh = Time.unscaledTime + RaycasterRefreshSeconds;

@@ -145,11 +145,33 @@ namespace XREditorControls
 
         public bool IsOwnMouseInteractor(XRBaseInteractor interactor) => interactor != null && interactor == ownMouseInteractor;
 
-        /// <summary>Points the controls' own pointer along the mouse, so things react to hover as they do with a controller.</summary>
+        /// <summary>Where the "hand" sits, right, down and forward from the camera. Set from the laser settings.</summary>
+        public Vector3 HandOffset { get; set; }
+
+        /// <summary>While something is held, how far out the pointer aims, so it doesn't aim at the held object itself.</summary>
+        public float HoldDistance { get; set; }
+
+        /// <summary>
+        /// Points the controls' own pointer from the hand to what the mouse is on, so things react to hover as they
+        /// do with a controller. Starting at the hand, not the camera, matters for objects that fly to the hand
+        /// when grabbed: from the camera they'd land in your face.
+        /// </summary>
         public void Aim()
         {
             Ray ray = Ray;
-            MouseInteractor.transform.SetPositionAndRotation(ray.origin, Quaternion.LookRotation(ray.direction));
+            Vector3 target;
+            if (HoldDistance > 0f)
+                target = ray.GetPoint(HoldDistance);
+            else if (Raycast(ray, out RaycastHit hit))
+                target = hit.point;
+            else
+                target = ray.GetPoint(10f);
+
+            Vector3 hand = Camera.transform.TransformPoint(HandOffset);
+            Vector3 direction = target - hand;
+            if (direction.sqrMagnitude < 0.0001f)
+                direction = ray.direction;
+            MouseInteractor.transform.SetPositionAndRotation(hand, Quaternion.LookRotation(direction));
         }
 
         public void Destroy()

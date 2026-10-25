@@ -32,7 +32,7 @@ namespace XREditorControls
             this.pointer = pointer;
         }
 
-        /// <param name="skipTeleport">True when this right click turned a held object, so letting go must not teleport.</param>
+        /// <param name="skipTeleport">True while an object is held: the right click doesn't teleport then.</param>
         public void Update(bool skipTeleport)
         {
             if (EditorControlsInput.ArrowPressedThisFrame(KeyCode.LeftArrow))

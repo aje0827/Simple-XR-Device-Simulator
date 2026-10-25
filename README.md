@@ -2,6 +2,14 @@
 
 A lightweight way to test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard, without a headset.
 
+![Grabbing a cylinder with Command and turning it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
+
+| Look around and teleport | Scale what you're holding |
+|---|---|
+| ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
+
+**Try this scene yourself:** after installing, click **Tools > XR Editor Controls > Open Demo Scene** in Unity's menu, then press Play.
+
 I find Unity's XR Device Simulator hard to control, and it has far more inputs than I need to test in my apps. I built this to check small changes in the VR training apps I make without putting the headset on and off each time.
 
 It simulates one controller and looking around. The mouse is the controller's pointer, Alt turns your head, and a few keys cover the trigger, grip and thumbstick. Press Play and you can point at things, click buttons and hotspots, grab objects, teleport and turn. Everything goes through the toolkit's own interaction manager, so an object reacts the same way it does with a real controller, and nothing needs to be added to your interactables.
@@ -10,7 +18,8 @@ It simulates one controller and looking around. The mouse is the controller's po
 
 - One controller, driven by the mouse, and head look with Alt.
 - Things that take two hands in the headset get a one-hand shortcut instead. Scaling, for example, is a two-controller gesture in the headset; here it's Command + scroll on the object you're holding.
-- No second controller, no hand tracking, and no buttons beyond trigger, grip and thumbstick. If a scene depends on those, the XR Device Simulator is the better tool.
+- No second controller, no hand tracking, no climbing, and no buttons beyond trigger, grip and thumbstick. If a scene depends on those, the XR Device Simulator is the better tool.
+- XR Interaction Toolkit rigs only. Rigs from other systems, like Meta's Interaction SDK, aren't supported.
 
 ## Controls
 
@@ -20,12 +29,14 @@ It simulates one controller and looking around. The mouse is the controller's po
 | Left click | Trigger: press UI buttons, hotspots and other interactables. A laser shows where you're pointing |
 | Hold Alt (Option on Mac) and move the mouse | Look around |
 | Hold Command | Grip: grab what you're pointing at. It follows the mouse; let go to drop it |
-| Command + right mouse button + move | Turn the held object |
+| Command + Control + move | Turn the held object, like turning your wrist. Add Shift to roll it instead |
 | Command + scroll | Scale the held object, within the limits set on its grab transformer |
 | Hold right click, release | Thumbstick forward: teleport arc, then jump (red means nowhere to land) |
 | Left / Right arrow keys | Thumbstick left / right: snap turn |
 
 Works with a mouse or a Mac trackpad: a two-finger click is the right click, and a two-finger swipe is the scroll. Other trackpads haven't been tested.
+
+Recording a demo? Turn on **Show Input Label** on the prefab. It names the control in use in the corner of the Game view, and draws the cursor and a ring on each click, since Unity's recorder doesn't capture the real cursor. The GIFs above were made that way.
 
 ## Install
 
@@ -38,6 +49,10 @@ https://github.com/aje0827/EditorTools-Unity.git?path=Assets/EditorTools/EditorC
 Then drag `~EditorControls.prefab` (under Packages > XR Editor Controls) into your XR scene and press Play.
 
 There's nothing to wire up. It finds the camera, the event system and the controller pointer itself. The controls only run in the Editor, so they do nothing in a headset build.
+
+If Unity asks to enable the Input System's backends and restart, click Yes. The controls read the mouse and keyboard through it.
+
+To try it before adding it to your own scene, click **Tools > XR Editor Controls > Open Demo Scene**. It opens the XR Interaction Toolkit's own demo scene (importing its Starter Assets sample if you don't have it yet) with the controls added.
 
 You can also copy the `Assets/EditorTools/EditorControls/` folder into your project instead.
 

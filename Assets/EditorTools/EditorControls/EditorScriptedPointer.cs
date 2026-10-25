@@ -21,6 +21,7 @@ namespace XREditorControls
         public static bool RightPressed;
         public static bool RightReleased;
         public static bool CommandHeld;
+        public static bool ControlHeld;
         public static bool CommandPressed;
         public static bool CommandReleased;
 
@@ -36,6 +37,7 @@ namespace XREditorControls
             RightPressed = false;
             RightReleased = false;
             CommandHeld = false;
+            ControlHeld = false;
             CommandPressed = false;
             CommandReleased = false;
         }

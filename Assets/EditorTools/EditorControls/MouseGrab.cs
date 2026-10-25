@@ -8,21 +8,16 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Transformers;
-using Object = UnityEngine.Object;
 
 namespace XREditorControls
 {
     /// <summary>
-    /// The grip: hold Command to grab what the pointer is on. While holding, the right mouse button turns the
+    /// The grip: hold Command to grab what the pointer is on. While holding, Control turns the
     /// object and the scroll wheel scales it. The grab is the toolkit's own held select, so the object behaves
     /// as it does in the controller's hand.
     /// </summary>
     internal sealed class MouseGrab
     {
-        // A two-finger lift sends a scroll as the right click ends. Ignore it briefly,
-        // or the object changes size at the end of a turn.
-        const float ScrollQuietAfterTurn = 0.5f;
-
         readonly EditorMouseClickTester owner;
         readonly MousePointer pointer;
 
@@ -30,11 +25,31 @@ namespace XREditorControls
         readonly Dictionary<int, Vector3> scaleBasis = new Dictionary<int, Vector3>();
 
         bool turning;
-        bool rightClickWasTurn;
+
+        // The hold point turns while Control is down; it goes back to how it was on letting go.
+        Vector3 attachStartPosition;
+        Quaternion attachStartRotation;
         float pendingScroll;
-        float scrollQuietUntil;
+
+        // The mouse moves to turn the object, so the cursor is locked while turning and the pointer stays pinned
+        // where the turn started. After the turn the cursor is put back there before the pin comes off, or the
+        // object would jump to wherever the cursor ended up.
+        const int FramesToSettle = 3;
+        Vector2 turnStartedAt;
+        int aimHeldUntilFrame;
+        int turnFramesToIgnore;
 
         public IXRSelectInteractable Held { get; private set; }
+
+        /// <summary>True while the pointer should stay put: during a turn and the moment after it.</summary>
+        public bool HoldsAim => Held != null && (turning || Time.frameCount <= aimHeldUntilFrame);
+
+        // The cursor has had time to land back where the turn started; the pointer can follow it again.
+        void ReleasePinWhenSettled()
+        {
+            if (!turning && EditorControlsInput.PinnedPosition.HasValue && Time.frameCount > aimHeldUntilFrame)
+                EditorControlsInput.PinnedPosition = null;
+        }
 
         public MouseGrab(EditorMouseClickTester owner, MousePointer pointer)
         {
@@ -44,13 +59,15 @@ namespace XREditorControls
 
         public void Update()
         {
+            ReleasePinWhenSettled();
             if (EditorControlsInput.CommandPressedThisFrame)
                 Start();
             if (EditorControlsInput.CommandReleasedThisFrame)
                 End();
 
-            // Right button while holding: the mouse turns the object instead of moving it.
-            if (Held != null && EditorControlsInput.RightHeld)
+            // Control while holding: the mouse turns the object instead of moving it. A key, not a click, because a
+            // trackpad's two-finger press slips into a scroll, and the scroll scales.
+            if (Held != null && EditorControlsInput.ControlHeld)
             {
                 if (!turning)
                     BeginTurn();
@@ -58,36 +75,29 @@ namespace XREditorControls
             }
             else if (turning)
             {
-                turning = false;
-                scrollQuietUntil = Time.unscaledTime + ScrollQuietAfterTurn;
-                pendingScroll = 0f;
-                if (Held != null)
-                    ResumeMove();
+                EndTurn();
             }
 
-            // Scroll, or a two-finger swipe with the right button up, scales the held object. A two-finger press is
-            // the right click and the trackpad also reports it as a scroll, so it's ignored while turning and just after.
-            if (Held != null && !EditorControlsInput.RightHeld && Time.unscaledTime >= scrollQuietUntil)
+            // Scroll, or a two-finger swipe, scales the held object.
+            if (Held != null && !turning)
                 pendingScroll += EditorControlsInput.ScrollNotches;
-        }
-
-        /// <summary>True once per right click that turned a held object; that release must not teleport.</summary>
-        public bool TakeRightClickWasTurn()
-        {
-            if (!EditorControlsInput.RightReleasedThisFrame || !rightClickWasTurn)
-                return false;
-            rightClickWasTurn = false;
-            return true;
         }
 
         public void End()
         {
+            if (turning)
+                UnlockCursor();
             turning = false;
+            EditorControlsInput.PinnedPosition = null;
             pendingScroll = 0f;
             Held = null;
+            pointer.HoldDistance = 0f;
             XRRayInteractor mouse = pointer.MouseInteractor;
             if (mouse.isPerformingManualInteraction)
                 mouse.EndManualInteraction();
+            Transform attach = mouse.attachTransform;
+            if (attach != null)
+                attach.SetLocalPositionAndRotation(attachStartPosition, attachStartRotation);
         }
 
         // Grabs what the pointer is on, through the toolkit's held select (the same as the grip).
@@ -114,49 +124,70 @@ namespace XREditorControls
                 return;
 
             RememberScaleBasis(target.transform);
+            Vector3 cameraPosition = pointer.Camera.transform.position;
+            pointer.HoldDistance = pointer.Raycast(pointer.Ray, out RaycastHit grabHit)
+                ? grabHit.distance
+                : Vector3.Distance(cameraPosition, target.transform.position);
+            if (mouse.attachTransform != null)
+                mouse.attachTransform.GetLocalPositionAndRotation(out attachStartPosition, out attachStartRotation);
             mouse.StartManualInteraction(target);
             Held = target;
             owner.LogWorld("Grab " + target.transform.name);
         }
 
-        // Drops the toolkit's grab so it stops writing the pose while the mouse turns the object.
         void BeginTurn()
         {
             turning = true;
-            rightClickWasTurn = true;
             pendingScroll = 0f;
-            XRRayInteractor mouse = pointer.MouseInteractor;
-            if (mouse.isPerformingManualInteraction)
-                mouse.EndManualInteraction();
+            turnStartedAt = EditorControlsInput.MousePosition;
+            EditorControlsInput.PinnedPosition = turnStartedAt;
+            Cursor.lockState = CursorLockMode.Locked;
+            // Locking the cursor reports one big jump; that isn't the hand turning.
+            turnFramesToIgnore = 2;
         }
 
-        // Left and right spin around the vertical, up and down tilt around the view's sideways axis.
-        // Both turn around the middle of the object, not its root, which often sits well below the middle.
+        void EndTurn()
+        {
+            turning = false;
+            pendingScroll = 0f;
+            UnlockCursor();
+            aimHeldUntilFrame = Time.frameCount + FramesToSettle;
+        }
+
+        void UnlockCursor()
+        {
+            if (Cursor.lockState == CursorLockMode.Locked)
+                Cursor.lockState = CursorLockMode.None;
+            EditorControlsInput.WarpMouse(turnStartedAt);
+        }
+
+        // Turns the hold point, like turning a wrist, so the grab stays on and the object follows it the way it
+        // follows a controller. Left and right spin around the vertical, up and down tilt toward you, and with
+        // Shift held left and right roll it around the line you're looking along. The turn is around the middle
+        // of the object, not its root, which often sits well below the middle.
         void Turn()
         {
+            if (turnFramesToIgnore > 0)
+            {
+                turnFramesToIgnore--;
+                return;
+            }
             Vector2 pixels = EditorControlsInput.MouseDelta * 10f;
             if (pixels.sqrMagnitude < 0.0001f)
                 return;
+            Transform attach = pointer.MouseInteractor.attachTransform;
+            if (attach == null)
+                return;
 
-            float yaw = -pixels.x * owner.grabTurnSpeed;
-            float pitch = pixels.y * owner.grabTurnSpeed;
-            Quaternion spin = Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, pointer.Camera.transform.right);
+            Transform view = pointer.Camera.transform;
+            bool roll = EditorControlsInput.KeyHeld(KeyCode.LeftShift) || EditorControlsInput.KeyHeld(KeyCode.RightShift);
+            Quaternion spin = roll
+                ? Quaternion.AngleAxis(-pixels.x * owner.grabTurnSpeed, view.forward)
+                : Quaternion.AngleAxis(-pixels.x * owner.grabTurnSpeed, Vector3.up) * Quaternion.AngleAxis(pixels.y * owner.grabTurnSpeed, view.right);
+
             Transform t = Held.transform;
-            Vector3 localCenter = Center(t);
-            Vector3 worldCenter = t.TransformPoint(localCenter);
-            t.rotation = spin * t.rotation;
-            t.position += worldCenter - t.TransformPoint(localCenter);
-        }
-
-        // Right button up, Command still down: take hold again so the mouse moves the object.
-        void ResumeMove()
-        {
-            XRRayInteractor mouse = pointer.MouseInteractor;
-            if (mouse.isPerformingManualInteraction)
-                mouse.EndManualInteraction();
-            if (mouse.interactionManager == null)
-                mouse.interactionManager = pointer.Manager != null ? pointer.Manager : Object.FindAnyObjectByType<XRInteractionManager>();
-            mouse.StartManualInteraction(Held);
+            Vector3 middle = t.TransformPoint(Center(t));
+            attach.SetPositionAndRotation(middle + spin * (attach.position - middle), spin * attach.rotation);
         }
 
         /// <summary>
