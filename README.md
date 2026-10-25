@@ -8,7 +8,7 @@ Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpa
 |---|---|
 | ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
 
-Built for quick checks while developing XR apps. Putting a headset on and off for every small change is slow, and Unity's XR Device Simulator maps every headset input to the keyboard, which takes time to learn. This package keeps only the controls you use most, on keys that are easy to reach.
+Built for quick checks while developing XR apps. Putting a headset on and off for every small change is slow, and Unity's XR Device Simulator covers every headset input, so you keep switching which device the mouse moves (your head, left hand or right hand) while holding other keys. This package keeps only the controls you use most, on keys that are easy to reach.
 
 Press Play and the mouse becomes your controller. You can look around, click buttons, grab, rotate, scale and teleport.
 
