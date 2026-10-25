@@ -106,22 +106,24 @@ static class BuildSampleScene
 
         Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 250f), new Vector2(720f, 60f));
 
-        // The controls, keys on the left and what they do on the right. Mac key first, then Windows.
+        // The controls: what it does on the left, the keys on the right, both left aligned. Mac key first, then Windows.
         string[,] help =
         {
-            { "Hold Option / Alt + move", "Look around" },
-            { "Left click", "Trigger" },
-            { "Hold Command / Windows", "Grab what you point at" },
-            { "Command / Windows + Control + move", "Rotate it (add Shift to roll)" },
-            { "Command / Windows + scroll", "Scale it" },
-            { "Hold right click, release", "Teleport" },
-            { "Left / Right arrows", "Snap turn" },
+            { "Look around", "Hold Option / Alt + move" },
+            { "Trigger", "Left click" },
+            { "Grab what you point at", "Hold Command / Windows" },
+            { "Rotate it (add Shift to roll)", "Command / Windows + Control + move" },
+            { "Scale it", "Command / Windows + scroll" },
+            { "Teleport", "Hold right click, release" },
+            { "Snap turn", "Left / Right arrows" },
         };
         for (int i = 0; i < help.GetLength(0); i++)
         {
-            float y = 150f - 38f * i;
-            Label(panel.transform, "Keys " + i, help[i, 0], 24, new Vector2(-220f, y), new Vector2(440f, 36f)).alignment = TextAnchor.MiddleRight;
-            Label(panel.transform, "Does " + i, help[i, 1], 24, new Vector2(220f, y), new Vector2(380f, 36f)).alignment = TextAnchor.MiddleLeft;
+            float y = 170f - 38f * i;
+            Label(panel.transform, "Does " + i, help[i, 0], 24, new Vector2(-220f, y), new Vector2(290f, 36f)).alignment = TextAnchor.MiddleLeft;
+            var keys = Label(panel.transform, "Keys " + i, help[i, 1], 24, new Vector2(175f, y), new Vector2(440f, 36f));
+            keys.alignment = TextAnchor.MiddleLeft;
+            keys.color = new Color(0.75f, 0.78f, 0.85f);
         }
 
         Label(panel.transform, "Hint", "Grab the cube, then click Reset to put it back", 26, new Vector2(0f, -150f), new Vector2(720f, 50f));
