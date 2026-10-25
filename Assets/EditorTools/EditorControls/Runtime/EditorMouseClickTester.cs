@@ -1,7 +1,6 @@
 // Simple XR Device Simulator: https://github.com/aje0827/Simple-XR-Device-Simulator
 // Copied into a project? Change the original in this repo, not the copy.
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
@@ -10,11 +9,13 @@ namespace XREditorControls
     /// <summary>
     /// Editor-only controller for testing an XR scene without a headset. The mouse is the controller's
     /// pointer: a left click is the trigger, Command is the grip, the right button is the thumbstick.
-    /// Everything goes through the XR Interaction Toolkit, so interactables need nothing added.
+    /// The left button does only what the trigger does and Command only what the grip does, through the XR
+    /// Interaction Toolkit's own ray, so what works here works in the headset and what is broken there is
+    /// broken here. Interactables need nothing added.
     ///
     /// This component holds the settings and runs the parts in order; each part does one job:
-    /// <see cref="MousePointer"/> (the ray and interactors), <see cref="MouseUiClick"/> (UI panels),
-    /// <see cref="MouseWorldClick"/> (3D objects), <see cref="MouseGrab"/> (grab, turn, scale),
+    /// <see cref="MousePointer"/> (the ray, its trigger, and the interactors), <see cref="MouseUiClick"/> (UI panels),
+    /// <see cref="MouseGrab"/> (grab, turn, scale),
     /// <see cref="MouseLocomotion"/> (teleport and snap turn) and <see cref="MouseLaser"/> (what you see).
     /// </summary>
     public class EditorMouseClickTester : MonoBehaviour
@@ -32,11 +33,11 @@ namespace XREditorControls
         [Tooltip("Color the laser by what it points at.")]
         public bool visualizeRaycast = true;
         public Color raycastNormalColor = Color.gray;
-        [Tooltip("Pointing at something clickable.")]
+        [Tooltip("Pointing at something the ray can act on.")]
         public Color raycastHoverColor = Color.white;
-        [Tooltip("Pressing on something clickable.")]
+        [Tooltip("Pressing the trigger on something the ray can act on.")]
         public Color raycastClickColor = Color.green;
-        [Tooltip("Pressing on nothing clickable, or no teleport target.")]
+        [Tooltip("Pressing the trigger on nothing, or no teleport target.")]
         public Color raycastMissColor = Color.red;
         [Tooltip("Seconds between hover checks for the laser color.")]
         public float hoverUpdateRate = 0.05f;
@@ -54,33 +55,33 @@ namespace XREditorControls
 
         [Header("References (found automatically when empty)")]
         public Camera mainCamera;
-        public EventSystem eventSystem;
-        [Tooltip("Leave empty to use the rig's controller ray, or the controls' own pointer when the controllers are off.")]
-        public XRBaseInteractor clickRayInteractor;
 
         [Header("Recording")]
         [Tooltip("Show which control is in use, like \"⌘ Grab\", in the corner of the Game view. For demos and screen recordings.")]
         public bool showInputLabel = false;
 
         [Header("Debug")]
-        [Tooltip("Write each world click, grab and teleport to the Console.")]
+        [Tooltip("Write each grab and teleport to the Console.")]
         public bool logWorldHits = false;
-        [Tooltip("Write each UI press to the Console.")]
+        [Tooltip("Write each UI click to the Console.")]
         public bool logUIHits = false;
 
-        /// <summary>The last UI control a mouse click ran. Empty until a click lands.</summary>
+        /// <summary>The last UI control the XR UI Input Module clicked. Empty until a click lands.</summary>
         public static string lastUiClick;
 
 #if UNITY_EDITOR
         MousePointer pointer;
         MouseUiClick ui;
-        MouseWorldClick world;
         MouseGrab grab;
         MouseLocomotion locomotion;
         MouseLaser laser;
         MouseInputLabel inputLabel;
 
         bool buttonDown;
+        bool triggerDown;
+        float lookPressAt = -1f;
+        int triggerPressedFrame = -1;
+        bool releaseNextFrame;
         bool gazeSelectStopped;
         float gazeSelectGiveUpAt;
 #endif
@@ -144,19 +145,16 @@ namespace XREditorControls
         {
             if (mainCamera == null)
                 mainCamera = Camera.main;
-            if (eventSystem == null)
-                eventSystem = FindAnyObjectByType<EventSystem>();
 
-            pointer = new MousePointer(mainCamera, clickRayInteractor) { HandOffset = laserHandOffset };
-            clickRayInteractor = pointer.ClickInteractor;
-            ui = new MouseUiClick(this, eventSystem, mainCamera);
+            pointer = new MousePointer(mainCamera) { HandOffset = laserHandOffset };
+            ui = new MouseUiClick(this);
             locomotion = new MouseLocomotion(this, pointer);
-            world = new MouseWorldClick(this, pointer, locomotion);
             grab = new MouseGrab(this, pointer);
-            laser = new MouseLaser(this, pointer, ui, locomotion, grab);
+            laser = new MouseLaser(this, pointer, locomotion, grab);
             inputLabel = new MouseInputLabel(grab);
 
             ui.TakeMouseOffUiModules();
+            ui.CheckScene();
             EditorScriptedPointer.Clear();
             gazeSelectGiveUpAt = Time.unscaledTime + 30f;
             StopGazeSelect();
@@ -169,14 +167,23 @@ namespace XREditorControls
 
             StopGazeSelect();
 
-            // A press on UI waits for the release to count. While looking around, a press on a 3D object is ignored.
+            // The toolkit reads the trigger a frame after it's set, so a press and release in the same frame
+            // (a scripted click) lets go one frame later, or the press would never be seen.
+            if (releaseNextFrame && Time.frameCount > triggerPressedFrame)
+                ReleaseTrigger();
+
+            // The left button is the trigger. While looking around, a trackpad tap is a press and release in the
+            // same instant, so there it only counts once it's held briefly, the way a real click is.
             if (EditorControlsInput.LeftPressedThisFrame)
             {
                 buttonDown = true;
-                bool looking = EditorMouseRotationTester.SuppressClicks;
-                if (!ui.Press(looking) && !looking)
-                    world.Click();
+                if (EditorMouseRotationTester.SuppressClicks)
+                    lookPressAt = Time.unscaledTime;
+                else
+                    PressTrigger();
             }
+            if (lookPressAt >= 0f && EditorControlsInput.LeftHeld && Time.unscaledTime - lookPressAt >= 0.1f)
+                PressTrigger();
 
             if (visualizeRaycast)
                 laser.UpdateColor(buttonDown);
@@ -185,7 +192,6 @@ namespace XREditorControls
             // While Control turns a held object, it stays put so the mouse doesn't also slide the object.
             if (!grab.HoldsAim)
                 pointer.Aim();
-            ui.Update();
 
             grab.Update();
             locomotion.Update(grab.Held != null);
@@ -195,8 +201,11 @@ namespace XREditorControls
 
             if (EditorControlsInput.LeftReleasedThisFrame)
             {
-                ui.Release();
-                world.Release();
+                lookPressAt = -1f;
+                if (Time.frameCount > triggerPressedFrame)
+                    ReleaseTrigger();
+                else if (triggerDown)
+                    releaseNextFrame = true;
                 buttonDown = false;
                 if (visualizeRaycast)
                     laser.UpdateColor(false, now: true);
@@ -216,14 +225,51 @@ namespace XREditorControls
             laser.Draw();
         }
 
+        void PressTrigger()
+        {
+            lookPressAt = -1f;
+            if (triggerDown)
+                return;
+            triggerDown = true;
+            triggerPressedFrame = Time.frameCount;
+            pointer.SetTrigger(true);
+        }
+
+        void ReleaseTrigger()
+        {
+            releaseNextFrame = false;
+            if (!triggerDown)
+                return;
+            triggerDown = false;
+            pointer.SetTrigger(false);
+        }
+
         void OnGUI()
         {
-            if (showInputLabel && enableMouseTesting)
+            if (!enableMouseTesting)
+                return;
+            if (showInputLabel)
                 inputLabel?.Draw();
+            if (ui != null && ui.Problem.Length > 0)
+                DrawProblem(ui.Problem);
+        }
+
+        // Shown in the Game view as well as the Console, because a click that does nothing looks like a broken simulator.
+        static void DrawProblem(string problem)
+        {
+            var style = new GUIStyle(GUI.skin.box) { alignment = TextAnchor.UpperLeft, wordWrap = true, fontSize = 13 };
+            style.normal.textColor = Color.white;
+            float width = Mathf.Min(520f, Screen.width - 20f);
+            float height = style.CalcHeight(new GUIContent(problem), width) + 8f;
+            Color before = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.8f, 0.1f, 0.1f, 1f);
+            GUI.Box(new Rect(10f, 10f, width, height), problem, style);
+            GUI.backgroundColor = before;
         }
 
         void OnDestroy()
         {
+            ui?.Unhook();
             pointer?.Destroy();
         }
 

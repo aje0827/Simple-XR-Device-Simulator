@@ -9,13 +9,12 @@ namespace XREditorControls
 {
     /// <summary>
     /// The laser you see in the Game view: a line from a "hand" near the camera to where the mouse points,
-    /// or a curved arc while aiming a teleport. Its color says whether the pointer is on something clickable.
+    /// or a curved arc while aiming a teleport. Its color says whether the ray is on something it can act on.
     /// </summary>
     internal sealed class MouseLaser
     {
         readonly EditorMouseClickTester owner;
         readonly MousePointer pointer;
-        readonly MouseUiClick ui;
         readonly MouseLocomotion locomotion;
         readonly MouseGrab grab;
 
@@ -25,11 +24,10 @@ namespace XREditorControls
         Color color;
         float nextColorCheck;
 
-        public MouseLaser(EditorMouseClickTester owner, MousePointer pointer, MouseUiClick ui, MouseLocomotion locomotion, MouseGrab grab)
+        public MouseLaser(EditorMouseClickTester owner, MousePointer pointer, MouseLocomotion locomotion, MouseGrab grab)
         {
             this.owner = owner;
             this.pointer = pointer;
-            this.ui = ui;
             this.locomotion = locomotion;
             this.grab = grab;
             color = owner.raycastNormalColor;
@@ -45,8 +43,7 @@ namespace XREditorControls
                 return;
             nextColorCheck = Time.time + owner.hoverUpdateRate;
 
-            bool overClickable = ui.IsOverUi()
-                || (pointer.Raycast(pointer.Ray, out RaycastHit hit) && MousePointer.IsClickable(hit.collider.gameObject));
+            bool overClickable = pointer.HoversSomething;
             if (buttonDown)
                 color = overClickable ? owner.raycastClickColor : owner.raycastMissColor;
             else
@@ -76,8 +73,8 @@ namespace XREditorControls
             {
                 locomotion.ClearArc();
                 end = ray.origin + ray.direction * 10f;
-                if (ui.TryGetHitPoint(out Vector3 uiPoint))
-                    end = uiPoint;
+                if (pointer.OverUi)
+                    end = pointer.UiPoint;
                 else if (pointer.Raycast(ray, out RaycastHit hit))
                     end = hit.point;
                 line.positionCount = 2;

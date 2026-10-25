@@ -30,12 +30,13 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 **Try it:** click **Tools > Simple XR Device Simulator > Open Basic Scene** and press Play. The controls are listed on a panel in the scene.
 
-**Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera, the event system and the controller on its own. It only runs in the Editor, so it has no effect on a headset build.
+**Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera and the event system on its own. It only runs in the Editor, so it has no effect on a headset build.
 
 ## What it supports
 
 - XR Interaction Toolkit scenes with an XR Origin rig.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
+- A left click does only what the trigger does, and Command only what the grip does, through the toolkit's own controller ray. If a button or a grab is broken in the headset, it's broken here too. For example, UI can't be pressed in a scene whose EventSystem has no XR UI Input Module, in the headset or here. The package warns about that in the Console and the Game view when you press Play.
 
 
 
@@ -54,7 +55,7 @@ The mouse points the controller. A laser shows where it's pointing, and hover hi
 | Action      | Keys                                         | Same as in the headset                                                   |
 | ----------- | -------------------------------------------- | ------------------------------------------------------------------------ |
 | Look around | Hold Option / Alt and move the mouse         | Turning your head                                                        |
-| Trigger     | Left click                                   | Trigger: press buttons and interactables                                 |
+| Trigger     | Left click                                   | Trigger: press UI buttons, and use what you're holding                   |
 | Grab        | Hold Command / Windows                       | Grip: the object follows the mouse, let go to drop it                    |
 | Rotate      | Command / Windows + Control + move the mouse | Turning your wrist. Add Shift to roll                                    |
 | Scale       | Command / Windows + scroll                   | Two-handed scale, within the limits set on the object's grab transformer |
