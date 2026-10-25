@@ -4,6 +4,10 @@ Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpa
 
 ![Grabbing a cylinder with Command and rotating it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
 
+| Look around and teleport | Scale what you're holding |
+|---|---|
+| ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
+
 Built for quick checks while developing XR apps. Press Play and the mouse becomes your controller. You can look around, click buttons, grab, rotate, scale and teleport.
 
 It works with the XR Interaction Toolkit interactables and UI already in your scene. They respond the same way they do to a real controller, so you can test them as they are.
