@@ -99,7 +99,7 @@ static class BuildSampleScene
         panel.AddComponent<GraphicRaycaster>();
         panel.AddComponent<TrackedDeviceGraphicRaycaster>();
         var rect = panel.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(780f, 600f);
+        rect.sizeDelta = new Vector2(900f, 600f);
         rect.position = new Vector3(0f, 1.55f, 2.5f);
         rect.localScale = Vector3.one * 0.002f;
         panel.AddComponent<Image>().color = new Color(0.1f, 0.11f, 0.14f, 0.92f);
@@ -110,19 +110,19 @@ static class BuildSampleScene
         // The controls, keys on the left and what they do on the right. Mac key first, then Windows.
         string[,] help =
         {
-            { "Left click", "Trigger: press buttons" },
+            { "Left click", "Trigger" },
             { "Hold right click, release", "Teleport" },
             { "Hold Option / Alt + move", "Look around" },
             { "Hold Command / Windows", "Grab what you point at" },
-            { "+ Control + move", "Turn it (add Shift to roll)" },
-            { "+ scroll", "Scale it" },
+            { "Command / Windows + Control + move", "Turn it (add Shift to roll)" },
+            { "Command / Windows + scroll", "Scale it" },
             { "Left / Right arrows", "Snap turn" },
         };
         for (int i = 0; i < help.GetLength(0); i++)
         {
             float y = 150f - 38f * i;
-            Label(panel.transform, "Keys " + i, help[i, 0], 24, new Vector2(-190f, y), new Vector2(360f, 36f)).alignment = TextAnchor.MiddleRight;
-            Label(panel.transform, "Does " + i, help[i, 1], 24, new Vector2(190f, y), new Vector2(340f, 36f)).alignment = TextAnchor.MiddleLeft;
+            Label(panel.transform, "Keys " + i, help[i, 0], 24, new Vector2(-220f, y), new Vector2(440f, 36f)).alignment = TextAnchor.MiddleRight;
+            Label(panel.transform, "Does " + i, help[i, 1], 24, new Vector2(220f, y), new Vector2(380f, 36f)).alignment = TextAnchor.MiddleLeft;
         }
 
         Label(panel.transform, "Hint", "Grab the cube, then click Reset to put it back", 26, new Vector2(0f, -150f), new Vector2(720f, 50f));
