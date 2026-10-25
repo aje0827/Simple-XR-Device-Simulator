@@ -105,7 +105,6 @@ static class BuildSampleScene
         panel.AddComponent<Image>().color = new Color(0.1f, 0.11f, 0.14f, 0.92f);
 
         Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 250f), new Vector2(720f, 60f));
-        Label(panel.transform, "Subtitle", "The mouse is your controller. Point with it.", 26, new Vector2(0f, 200f), new Vector2(720f, 40f));
 
         // The controls, keys on the left and what they do on the right. Mac key first, then Windows.
         string[,] help =
