@@ -73,3 +73,7 @@ You can also copy the `Assets/EditorTools/EditorControls/` folder into your proj
 - The Input System (the XR Interaction Toolkit needs it too)
 - Built and tested on macOS. On Windows, the Windows key takes the place of Command. Windows hasn't been tested yet
 
+
+## License
+
+MIT. See [LICENSE](LICENSE).
