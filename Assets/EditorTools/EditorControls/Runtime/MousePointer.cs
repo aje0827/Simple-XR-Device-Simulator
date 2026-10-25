@@ -1,18 +1,22 @@
 // Simple XR Device Simulator: https://github.com/aje0827/Simple-XR-Device-Simulator
 // Copied into a project? Change the original in this repo, not the copy.
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Inputs.Readers;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 using Object = UnityEngine.Object;
 
 namespace XREditorControls
 {
     /// <summary>
     /// The mouse as a controller pointer: the ray from the camera through the cursor, what it hits, and the
-    /// interactors that act for the controller. When the rig's controllers are off (no headset), the
-    /// controls make their own invisible ray interactor and steer it with the mouse.
+    /// interactors that act for the controller. The controls make their own invisible ray interactor, steer it
+    /// with the mouse and press its trigger, so the toolkit does the hovering, pressing and grabbing.
     /// </summary>
     internal sealed class MousePointer
     {
@@ -21,22 +25,25 @@ namespace XREditorControls
         /// <summary>Where the last <see cref="Raycast"/> landed. A click on a teleport floor lands there.</summary>
         public Vector3 LastHitPoint { get; private set; }
 
-        public XRBaseInteractor ClickInteractor { get; private set; }
-        public XRInteractionManager Manager { get; private set; }
-
         XRRayInteractor ownMouseInteractor;
         XRRayInteractor ownArcInteractor;
 
         readonly RaycastHit[] hits = new RaycastHit[32];
 
-        public MousePointer(Camera camera, XRBaseInteractor clickInteractor)
+        // Panels a controller ray can press. Panels that switch on later are picked up on the next refresh.
+        const float PanelRefreshSeconds = 0.5f;
+        TrackedDeviceGraphicRaycaster[] panels = new TrackedDeviceGraphicRaycaster[0];
+        float nextPanelRefresh;
+
+        /// <summary>Where the pointer meets a panel a controller ray can press, when <see cref="OverUi"/>.</summary>
+        public Vector3 UiPoint { get; private set; }
+
+        /// <summary>True when the last <see cref="Aim"/> landed on a panel a controller ray can press.</summary>
+        public bool OverUi { get; private set; }
+
+        public MousePointer(Camera camera)
         {
             Camera = camera;
-            ClickInteractor = clickInteractor != null ? clickInteractor : FindInteractor(false);
-            if (ClickInteractor != null)
-                Manager = ClickInteractor.interactionManager;
-            if (Manager == null)
-                Manager = Object.FindAnyObjectByType<XRInteractionManager>();
         }
 
         public Ray Ray => Camera.ScreenPointToRay(EditorControlsInput.MousePosition);
@@ -68,26 +75,6 @@ namespace XREditorControls
             return found;
         }
 
-        public static bool IsClickable(GameObject target)
-        {
-            return target.GetComponentInParent<XRBaseInteractable>() != null || target.GetComponent<IClickable>() != null;
-        }
-
-        /// <summary>Controllers can be switched off after Play starts (no headset), so this is checked on every click.</summary>
-        public bool RefreshClickInteractor()
-        {
-            if (ClickInteractor == null || !ClickInteractor.isActiveAndEnabled)
-            {
-                ClickInteractor = FindInteractor(false);
-                Manager = null;
-            }
-            if (Manager == null && ClickInteractor != null)
-                Manager = ClickInteractor.interactionManager;
-            if (Manager == null)
-                Manager = Object.FindAnyObjectByType<XRInteractionManager>();
-            return ClickInteractor != null && Manager != null;
-        }
-
         /// <summary>Any active controller interactor (ray or near-far). wantTeleport picks the teleport one.</summary>
         public XRBaseInteractor FindInteractor(bool wantTeleport)
         {
@@ -112,8 +99,11 @@ namespace XREditorControls
                 // Not parented, so no scale above it can stretch what it grabs.
                 ownMouseInteractor = new GameObject("Simple XR Device Simulator Pointer").AddComponent<XRRayInteractor>();
                 ownMouseInteractor.useForceGrab = false; // grabbed things stay where they are, like a far grab
-                // Grabbing only. UI clicks go through the UI clicker; a 3D select here could block later panel clicks.
-                ownMouseInteractor.enableUIInteraction = false;
+                // The left button is this pointer's trigger, so UI is pressed the way a controller presses it:
+                // through the scene's XR UI Input Module. A scene the headset can't press can't be pressed here either.
+                ownMouseInteractor.enableUIInteraction = true;
+                UseManualInput(ownMouseInteractor.activateInput);
+                UseManualInput(ownMouseInteractor.uiPressInput);
                 // Reach what the controller's pointer reaches, so teleport spots don't light up under the mouse.
                 foreach (XRBaseInteractor interactor in Object.FindObjectsByType<XRBaseInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 {
@@ -122,6 +112,8 @@ namespace XREditorControls
                     if (interactor.GetType().Name == "NearFarInteractor" || (interactor is XRRayInteractor && !(interactor is XRGazeInteractor)))
                     {
                         ownMouseInteractor.interactionLayers = interactor.interactionLayers;
+                        if (interactor is XRRayInteractor ray)
+                            ownMouseInteractor.raycastMask = ray.raycastMask;
                         break;
                     }
                 }
@@ -145,6 +137,22 @@ namespace XREditorControls
 
         public bool IsOwnMouseInteractor(XRBaseInteractor interactor) => interactor != null && interactor == ownMouseInteractor;
 
+        /// <summary>Pulls or lets go of the trigger: the toolkit reads it next frame, as it reads a controller's.</summary>
+        public void SetTrigger(bool down)
+        {
+            float value = down ? 1f : 0f;
+            MouseInteractor.activateInput.QueueManualState(down, value);
+            MouseInteractor.uiPressInput.QueueManualState(down, value);
+        }
+
+        /// <summary>True while the pointer hovers something the toolkit lets it act on, or a panel it can press.</summary>
+        public bool HoversSomething => OverUi || (ownMouseInteractor != null && ownMouseInteractor.interactablesHovered.Count > 0);
+
+        static void UseManualInput(XRInputButtonReader input)
+        {
+            input.inputSourceMode = XRInputButtonReader.InputSourceMode.ManualValue;
+        }
+
         /// <summary>Where the "hand" sits, right, down and forward from the camera. Set from the laser settings.</summary>
         public Vector3 HandOffset { get; set; }
 
@@ -160,9 +168,17 @@ namespace XREditorControls
         {
             Ray ray = Ray;
             Vector3 target;
+            bool hitSolid = Raycast(ray, out RaycastHit hit);
+            Vector3 uiPoint = Vector3.zero;
+            OverUi = HoldDistance <= 0f && RaycastUi(ray, hitSolid ? hit.distance : float.MaxValue, out uiPoint);
+            if (OverUi)
+                UiPoint = uiPoint;
+
             if (HoldDistance > 0f)
                 target = ray.GetPoint(HoldDistance);
-            else if (Raycast(ray, out RaycastHit hit))
+            else if (OverUi)
+                target = uiPoint;
+            else if (hitSolid)
                 target = hit.point;
             else
                 target = ray.GetPoint(10f);
@@ -172,6 +188,50 @@ namespace XREditorControls
             if (direction.sqrMagnitude < 0.0001f)
                 direction = ray.direction;
             MouseInteractor.transform.SetPositionAndRotation(hand, Quaternion.LookRotation(direction));
+        }
+
+        // The nearest UI under the cursor on a panel a controller ray can press, closer than maxDistance. The
+        // pointer aims there, so its ray from the hand lands on the same spot the cursor is on.
+        bool RaycastUi(Ray ray, float maxDistance, out Vector3 point)
+        {
+            point = Vector3.zero;
+            if (Time.unscaledTime >= nextPanelRefresh)
+            {
+                panels = Object.FindObjectsByType<TrackedDeviceGraphicRaycaster>(FindObjectsSortMode.None);
+                nextPanelRefresh = Time.unscaledTime + PanelRefreshSeconds;
+            }
+
+            Vector2 screen = EditorControlsInput.MousePosition;
+            float best = maxDistance;
+            bool found = false;
+            foreach (TrackedDeviceGraphicRaycaster panel in panels)
+            {
+                if (panel == null || !panel.isActiveAndEnabled)
+                    continue;
+                Canvas canvas = panel.GetComponent<Canvas>();
+                if (canvas == null || canvas.renderMode != RenderMode.WorldSpace)
+                    continue;
+                var plane = new Plane(canvas.transform.forward, canvas.transform.position);
+                if (!plane.Raycast(ray, out float distance) || distance >= best || !OnGraphic(canvas, screen))
+                    continue;
+                best = distance;
+                point = ray.GetPoint(distance);
+                found = true;
+            }
+            return found;
+        }
+
+        bool OnGraphic(Canvas canvas, Vector2 screen)
+        {
+            IList<Graphic> graphics = GraphicRegistry.GetRaycastableGraphicsForCanvas(canvas);
+            for (int i = 0; i < graphics.Count; i++)
+            {
+                Graphic graphic = graphics[i];
+                if (graphic.depth != -1 && graphic.raycastTarget && !graphic.canvasRenderer.cull
+                    && RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, screen, Camera))
+                    return true;
+            }
+            return false;
         }
 
         public void Destroy()

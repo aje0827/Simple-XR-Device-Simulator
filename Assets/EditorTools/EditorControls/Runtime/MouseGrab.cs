@@ -114,12 +114,7 @@ namespace XREditorControls
                     break;
                 }
             }
-            if (target == null && pointer.Raycast(pointer.Ray, out RaycastHit hit))
-            {
-                XRBaseInteractable found = hit.collider.GetComponentInParent<XRBaseInteractable>();
-                if (found != null && !(found is BaseTeleportationInteractable))
-                    target = found;
-            }
+            // Only what the ray hovers, as with the grip: something on a layer the controller can't reach stays put.
             if (target == null)
                 return;
 
