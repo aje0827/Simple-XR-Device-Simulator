@@ -1,4 +1,4 @@
-# EditorTools-Unity: XR editor controls
+# Simple XR Device Simulator
 
 A lightweight way to test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard, without a headset.
 
@@ -8,9 +8,9 @@ A lightweight way to test an XR scene in the Unity Editor with a mouse or trackp
 |---|---|
 | ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
 
-**Try it:** after installing, open **Window > Package Manager**, select **XR Editor Controls**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
+**Try it:** after installing, open **Window > Package Manager**, select **Simple XR Device Simulator**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
 
-I find Unity's XR Device Simulator hard to control, and it has far more inputs than I need to test in my apps. I built this to check small changes in the VR training apps I make without putting the headset on and off each time.
+Built for quick checks while developing XR apps: point, click, grab, rotate and teleport in Play mode without putting on a headset. Unity's XR Device Simulator reproduces every input a headset has. This covers the ones you use most, on keys that are easy to reach.
 
 It simulates one controller and looking around. The mouse is the controller's pointer, Alt turns your head, and a few keys cover the trigger, grip and thumbstick. Press Play and you can point at things, click buttons and hotspots, grab objects, teleport and turn. Everything goes through the toolkit's own interaction manager, so an object reacts the same way it does with a real controller, and nothing needs to be added to your interactables.
 
@@ -43,16 +43,16 @@ Recording a demo? Turn on **Show Input Label** on the prefab. It names the contr
 In Unity, open **Window > Package Manager**, click **+**, choose **Add package from git URL**, and paste:
 
 ```
-https://github.com/aje0827/EditorTools-Unity.git?path=Assets/EditorTools/EditorControls
+https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/EditorTools/EditorControls
 ```
 
-Then drag `~EditorControls.prefab` (under Packages > XR Editor Controls) into your XR scene and press Play.
+Then drag `~EditorControls.prefab` (under Packages > Simple XR Device Simulator) into your XR scene and press Play.
 
 There's nothing to wire up. It finds the camera, the event system and the controller pointer itself. The controls only run in the Editor, so they do nothing in a headset build.
 
 If Unity asks to enable the Input System's backends and restart, click Yes. The controls read the mouse and keyboard through it.
 
-To try it before adding it to your own scene, import the **Basic Scene** sample from the package's **Samples** tab. To try it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > XR Editor Controls > Open Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the controls.
+To try it before adding it to your own scene, import the **Basic Scene** sample from the package's **Samples** tab. To try it in the XR Interaction Toolkit's own demo scene, the one in the GIFs, click **Tools > Simple XR Device Simulator > Open Demo Scene**. It imports the toolkit's Starter Assets sample if you don't have it yet and adds the controls.
 
 You can also copy the `Assets/EditorTools/EditorControls/` folder into your project instead.
 

@@ -1,5 +1,5 @@
 // Builds the package's "Basic Scene" sample. Not part of the package: it lives outside EditorControls.
-// Run Tools > XR Editor Controls > Build Sample Scene. It saves the scene in Assets/XREditorControlsSample and
+// Run Tools > Simple XR Device Simulator > Build Sample Scene. It saves the scene in Assets/XREditorControlsSample and
 // copies that folder, .meta files included, into the package's Samples~/Basic Scene for the Samples tab.
 using UnityEditor;
 using UnityEditor.Events;
@@ -27,7 +27,7 @@ static class BuildSampleScene
 
     static Material defaultMaterial;
 
-    [MenuItem("Tools/XR Editor Controls/Build Sample Scene")]
+    [MenuItem("Tools/Simple XR Device Simulator/Build Sample Scene")]
     static void Build()
     {
         defaultMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Material.mat");
@@ -105,7 +105,7 @@ static class BuildSampleScene
         rect.localScale = Vector3.one * 0.002f;
         panel.AddComponent<Image>().color = new Color(0.1f, 0.11f, 0.14f, 0.92f);
 
-        Label(panel.transform, "Title", "XR Editor Controls", 40, new Vector2(0f, 250f), new Vector2(720f, 60f));
+        Label(panel.transform, "Title", "Simple XR Device Simulator", 40, new Vector2(0f, 250f), new Vector2(720f, 60f));
 
         // The controls: what it does on the left, the keys on the right, both left aligned. Mac key first, then Windows.
         string[,] help =
