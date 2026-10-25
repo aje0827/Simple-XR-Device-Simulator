@@ -110,12 +110,12 @@ static class BuildSampleScene
         // The controls, keys on the left and what they do on the right. Mac key first, then Windows.
         string[,] help =
         {
-            { "Left click", "Trigger" },
-            { "Hold right click, release", "Teleport" },
             { "Hold Option / Alt + move", "Look around" },
+            { "Left click", "Trigger" },
             { "Hold Command / Windows", "Grab what you point at" },
-            { "Command / Windows + Control + move", "Turn it (add Shift to roll)" },
+            { "Command / Windows + Control + move", "Rotate it (add Shift to roll)" },
             { "Command / Windows + scroll", "Scale it" },
+            { "Hold right click, release", "Teleport" },
             { "Left / Right arrows", "Snap turn" },
         };
         for (int i = 0; i < help.GetLength(0); i++)
