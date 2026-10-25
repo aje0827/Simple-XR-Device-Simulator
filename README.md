@@ -2,7 +2,7 @@
 
 Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpad and a keyboard.
 
-![Grabbing a cylinder with Command and rotating it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
+<img src="docs/grab-and-turn.gif" width="100%" alt="Grabbing a cylinder with Command and rotating it with Control in the XR Interaction Toolkit demo scene">
 
 | Look around and teleport | Scale what you're holding |
 |---|---|
