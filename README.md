@@ -1,6 +1,6 @@
 # Simple XR Device Simulator
 
-A lightweight way to test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard, without a headset.
+Test an XR scene in the Unity Editor with a mouse or trackpad and a keyboard.
 
 ![Grabbing a cylinder with Command and turning it with Control in the XR Interaction Toolkit demo scene](docs/grab-and-turn.gif)
 
@@ -10,16 +10,15 @@ A lightweight way to test an XR scene in the Unity Editor with a mouse or trackp
 
 **Try it:** after installing, open **Window > Package Manager**, select **Simple XR Device Simulator**, open the **Samples** tab and click **Import** next to **Basic Scene**. Open the scene and press Play. The controls are listed on a panel in the scene.
 
-Built for quick checks while developing XR apps: point, click, grab, rotate and teleport in Play mode without putting on a headset. Unity's XR Device Simulator reproduces every input a headset has. This covers the ones you use most, on keys that are easy to reach.
+Built for quick checks while developing XR apps. Press Play and the mouse becomes your controller. You can look around, click buttons, grab, rotate, scale and teleport.
 
-It simulates one controller and looking around. The mouse is the controller's pointer, Alt turns your head, and a few keys cover the trigger, grip and thumbstick. Press Play and you can point at things, click buttons and hotspots, grab objects, teleport and turn. Everything goes through the toolkit's own interaction manager, so an object reacts the same way it does with a real controller, and nothing needs to be added to your interactables.
+It works with the buttons and objects already in your scene, and they respond the same way they do to a real controller.
 
-## What it covers, and what it doesn't
+## What it works with
 
-- One controller, driven by the mouse, and head look with Alt.
-- Things that take two hands in the headset get a one-hand shortcut instead. Scaling, for example, is a two-controller gesture in the headset; here it's Command + scroll on the object you're holding.
-- No second controller, no hand tracking, no climbing, and no buttons beyond trigger, grip and thumbstick. If a scene depends on those, the XR Device Simulator is the better tool.
-- XR Interaction Toolkit rigs only. Rigs from other systems, like Meta's Interaction SDK, aren't supported.
+- Scenes built with the XR Interaction Toolkit and its XR Origin rig. Other rigs, like Meta's Interaction SDK, aren't supported.
+- One controller. Actions that take two hands in the headset get a key instead. Scaling, for example, is Command + scroll.
+- For a second controller, hand tracking or climbing, use Unity's XR Device Simulator.
 
 ## Controls
 
