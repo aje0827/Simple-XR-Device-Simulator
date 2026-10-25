@@ -46,12 +46,6 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 ## Controls
 
-
-| Look around and teleport                                                                       | Scale what you're holding                                          |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| ![Looking around with Option, then teleporting with a right click](docs/look-and-teleport.gif) | ![Scaling a held cylinder with Command and scroll](docs/scale.gif) |
-
-
 The mouse points the controller. A laser shows where it's pointing, and hover highlights show up as they do in the headset.
 
 
