@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8572846273333117343}
   - component: {fileID: 2241418709583097653}
   m_Layer: 0
-  m_Name: ~EditorControls
+  m_Name: Simple XR Device Simulator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

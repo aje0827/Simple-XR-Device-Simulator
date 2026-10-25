@@ -23,7 +23,7 @@ static class BuildSampleScene
 {
     const string Folder = "Assets/XREditorControlsSample";
     const string PackageSample = "Assets/EditorTools/EditorControls/Samples~/Basic Scene";
-    const string ControlsPrefab = "Assets/EditorTools/EditorControls/~EditorControls.prefab";
+    const string ControlsPrefab = "Assets/EditorTools/EditorControls/Simple XR Device Simulator.prefab";
 
     static Material defaultMaterial;
 

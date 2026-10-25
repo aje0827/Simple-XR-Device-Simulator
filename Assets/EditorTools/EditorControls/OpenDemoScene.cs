@@ -16,8 +16,8 @@ namespace XREditorControls
     internal static class OpenDemoScene
     {
         const string ToolkitPackage = "com.unity.xr.interaction.toolkit";
-        const string ControlsPrefab = "Packages/com.albertelias.simple-xr-device-simulator/~EditorControls.prefab";
-        const string ControlsPrefabCopied = "Assets/EditorTools/EditorControls/~EditorControls.prefab";
+        const string ControlsPrefab = "Packages/com.albertelias.simple-xr-device-simulator/Simple XR Device Simulator.prefab";
+        const string ControlsPrefabCopied = "Assets/EditorTools/EditorControls/Simple XR Device Simulator.prefab";
 
         [MenuItem("Tools/Simple XR Device Simulator/Open Demo Scene")]
         static void Open()
