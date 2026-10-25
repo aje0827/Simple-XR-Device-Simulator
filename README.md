@@ -16,9 +16,13 @@ It works with the XR Interaction Toolkit interactables and UI already in your sc
 
 ## What it supports
 
-- XR Interaction Toolkit scenes with an XR Origin rig. Other rigs, like Meta's Interaction SDK, aren't supported.
+- XR Interaction Toolkit scenes with an XR Origin rig.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
-- A second controller, hand tracking and climbing aren't supported. Unity's XR Device Simulator covers those.
+
+## Not supported
+
+- Other rigs, like Meta's Interaction SDK.
+- A second controller, hand tracking and climbing. For those, use Unity's XR Device Simulator.
 
 ## Controls
 
