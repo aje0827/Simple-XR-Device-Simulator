@@ -148,4 +148,11 @@ public class ClickMatchesHeadsetTests
         Assert.AreEqual(1, clicks, "Reset still clicks after A and B were used");
         a.Disable(); b.Disable();
     }
+
+    [UnityTest]
+    public IEnumerator CameraStaysAtHeadHeightWithoutAHeadset()
+    {
+        yield return Load();
+        Assert.AreEqual(1.6f, Camera.main.transform.position.y, 0.01f, "the head tracking must not pull the camera to the floor with no headset");
+    }
 }
