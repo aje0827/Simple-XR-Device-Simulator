@@ -113,4 +113,39 @@ public class ClickMatchesHeadsetTests
         Assert.IsTrue(held, "Command on the cube should grab it");
         Assert.IsFalse(grab.isSelected, "letting go of Command should drop it");
     }
+
+    [UnityTest]
+    public IEnumerator OneAndTwoPressTheRightControllersAAndB()
+    {
+        yield return Load();
+        var a = new UnityEngine.InputSystem.InputAction("A", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{RightHand}/primaryButton");
+        var b = new UnityEngine.InputSystem.InputAction("B", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{RightHand}/secondaryButton");
+        a.Enable(); b.Enable();
+        var cube = GameObject.Find("Grab Cube").GetComponent<Renderer>();
+        Assert.IsTrue(cube.enabled);
+
+        EditorScriptedPointer.Active = true;
+        EditorScriptedPointer.Position = new Vector2(5, 5);
+        EditorScriptedPointer.PrimaryHeld = true;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(a.IsPressed(), "holding 1 should press A");
+        Assert.IsFalse(b.IsPressed());
+        EditorScriptedPointer.PrimaryHeld = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsFalse(a.IsPressed(), "letting go of 1 should release A");
+
+        EditorScriptedPointer.SecondaryHeld = true;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(b.IsPressed(), "holding 2 should press B");
+        EditorScriptedPointer.SecondaryHeld = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsFalse(cube.enabled, "B should hide the sample cube");
+
+        // The stand-in controller must not get in the way of the trigger.
+        Button reset = FindReset();
+        clicks = 0; reset.onClick.AddListener(() => clicks++);
+        yield return ClickAt(ScreenPoint(reset));
+        Assert.AreEqual(1, clicks, "Reset still clicks after A and B were used");
+        a.Disable(); b.Disable();
+    }
 }

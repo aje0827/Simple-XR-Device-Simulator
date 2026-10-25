@@ -37,13 +37,14 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 - XR Interaction Toolkit scenes with an XR Origin rig.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
 - A left click does only what the trigger does, and Command only what the grip does, through the toolkit's own controller ray. If a button or a grab is broken in the headset, it's broken here too. For example, UI can't be pressed in a scene whose EventSystem has no XR UI Input Module, in the headset or here. The package warns about that in the Console and the Game view when you press Play.
+- The right controller's A and B buttons, on 1 and 2. Anything bound to the right controller's `primaryButton` or `secondaryButton` works as it is.
 
 
 
 ## Not supported
 
 - Other rigs, like Meta's Interaction SDK.
-- A second controller, hand tracking and climbing. For those, use Unity's XR Device Simulator.
+- A second controller (so no X and Y buttons), hand tracking and climbing. For those, use Unity's XR Device Simulator.
 
 
 
@@ -61,6 +62,8 @@ The mouse points the controller. A laser shows where it's pointing, and hover hi
 | Scale       | Command / Windows + scroll                   | Two-handed scale, within the limits set on the object's grab transformer |
 | Teleport    | Hold right click, then release               | Thumbstick forward. The arc turns red where you can't land               |
 | Snap turn   | Left / Right arrow keys                      | Thumbstick left / right                                                  |
+| A button    | Hold 1                                       | A on the right controller                                                |
+| B button    | Hold 2                                       | B on the right controller                                                |
 
 
 On a Mac trackpad, a two-finger click is the right click and a two-finger swipe is the scroll. Other trackpads haven't been tested.

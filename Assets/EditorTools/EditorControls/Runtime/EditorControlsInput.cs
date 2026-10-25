@@ -62,6 +62,10 @@ namespace XREditorControls
         // Control, added to the grip, turns the held object.
         public static bool ControlHeld => Scripted ? EditorScriptedPointer.ControlHeld : Held(Keys?.leftCtrlKey) || Held(Keys?.rightCtrlKey);
 
+        // 1 and 2 stand in for the controller's A and B buttons. Not the A and B keys: W A S D stays free for walking.
+        public static bool PrimaryButtonHeld => Scripted ? EditorScriptedPointer.PrimaryHeld : Held(Keys?.digit1Key);
+        public static bool SecondaryButtonHeld => Scripted ? EditorScriptedPointer.SecondaryHeld : Held(Keys?.digit2Key);
+
         // Arrow keys stand in for the controller's thumbstick (left and right snap turn).
         public static bool ArrowPressedThisFrame(KeyCode key) => Pressed(Arrow(key));
         public static bool ArrowReleasedThisFrame(KeyCode key) => Released(Arrow(key));

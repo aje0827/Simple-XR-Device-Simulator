@@ -81,6 +81,7 @@ static class BuildSampleScene
         body.useGravity = false;
         body.isKinematic = true;
         cube.AddComponent<XRGrabInteractable>();
+        cube.AddComponent<SampleFaceButtons>();
         var transformer = cube.AddComponent<XRGeneralGrabTransformer>();
         transformer.clampScaling = true;
         transformer.minimumScaleRatio = 0.25f;
@@ -117,10 +118,12 @@ static class BuildSampleScene
             { "Scale it", "Command / Windows + scroll" },
             { "Teleport", "Hold right click, release" },
             { "Snap turn", "Left / Right arrows" },
+            { "A button (lights the cube)", "1" },
+            { "B button (hides the cube)", "2" },
         };
         for (int i = 0; i < help.GetLength(0); i++)
         {
-            float y = 170f - 38f * i;
+            float y = 200f - 34f * i;
             Label(panel.transform, "Does " + i, help[i, 0], 24, new Vector2(-220f, y), new Vector2(290f, 36f)).alignment = TextAnchor.MiddleLeft;
             var keys = Label(panel.transform, "Keys " + i, help[i, 1], 24, new Vector2(175f, y), new Vector2(440f, 36f));
             keys.alignment = TextAnchor.MiddleLeft;

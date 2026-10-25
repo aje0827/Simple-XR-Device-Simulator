@@ -8,14 +8,14 @@ namespace XREditorControls
 {
     /// <summary>
     /// Editor-only controller for testing an XR scene without a headset. The mouse is the controller's
-    /// pointer: a left click is the trigger, Command is the grip, the right button is the thumbstick.
+    /// pointer: a left click is the trigger, Command is the grip, the right button is the thumbstick, 1 and 2 are A and B.
     /// The left button does only what the trigger does and Command only what the grip does, through the XR
     /// Interaction Toolkit's own ray, so what works here works in the headset and what is broken there is
     /// broken here. Interactables need nothing added.
     ///
     /// This component holds the settings and runs the parts in order; each part does one job:
     /// <see cref="MousePointer"/> (the ray, its trigger, and the interactors), <see cref="MouseUiClick"/> (UI panels),
-    /// <see cref="MouseGrab"/> (grab, turn, scale),
+    /// <see cref="MouseGrab"/> (grab, turn, scale), <c>MouseFaceButtons</c> (A and B),
     /// <see cref="MouseLocomotion"/> (teleport and snap turn) and <see cref="MouseLaser"/> (what you see).
     /// </summary>
     public class EditorMouseClickTester : MonoBehaviour
@@ -76,6 +76,9 @@ namespace XREditorControls
         MouseLocomotion locomotion;
         MouseLaser laser;
         MouseInputLabel inputLabel;
+#if ENABLE_VR
+        MouseFaceButtons faceButtons;
+#endif
 
         bool buttonDown;
         bool triggerDown;
@@ -152,6 +155,9 @@ namespace XREditorControls
             grab = new MouseGrab(this, pointer);
             laser = new MouseLaser(this, pointer, locomotion, grab);
             inputLabel = new MouseInputLabel(grab);
+#if ENABLE_VR
+            faceButtons = new MouseFaceButtons();
+#endif
 
             ui.TakeMouseOffUiModules();
             ui.CheckScene();
@@ -195,6 +201,9 @@ namespace XREditorControls
 
             grab.Update();
             locomotion.Update(grab.Held != null);
+#if ENABLE_VR
+            faceButtons.Update();
+#endif
 
             if (showInputLabel)
                 inputLabel.Update();
@@ -270,6 +279,9 @@ namespace XREditorControls
         void OnDestroy()
         {
             ui?.Unhook();
+#if ENABLE_VR
+            faceButtons?.Remove();
+#endif
             pointer?.Destroy();
         }
 
