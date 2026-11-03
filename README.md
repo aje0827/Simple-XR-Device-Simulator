@@ -36,7 +36,7 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 - XR Interaction Toolkit scenes with an XR Origin rig.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
-- A left click does only what the trigger does, and Command only what the grip does, through the toolkit's own controller ray. If a button or a grab is broken in the headset, it's broken here too. For example, UI can't be pressed in a scene whose EventSystem has no XR UI Input Module, in the headset or here. The package warns about that in the Console and the Game view when you press Play.
+- A left click does only what the trigger does, and Command only what the grip does, through the toolkit's own controller ray. If a button or a grab is broken in the headset, it's broken here too. For example, UI can't be pressed in a scene whose EventSystem has no XR UI Input Module, in the headset or here. The package warns about that in the Console and the Game view when you press Play. If your rig grabs with the trigger (its Select is set to the same action as Activate), a left click grabs too, as the trigger does in the headset.
 - The right controller's A and B buttons, on 1 and 2. Anything bound to the right controller's `primaryButton` or `secondaryButton` works as it is.
 
 

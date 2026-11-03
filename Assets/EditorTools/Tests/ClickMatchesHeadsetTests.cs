@@ -219,6 +219,71 @@ public class ClickMatchesHeadsetTests
         Assert.AreEqual(1, clicks, "one click must press the button once, not once for the ray and again for the mouse");
     }
 
+    // Found in a real app: Some rigs grab with the trigger (Select wired to Activate), so their menus move with the
+    // trigger in the headset. A left click must then grab and move them too, and let go on release.
+    [UnityTest]
+    public IEnumerator ClickGrabsWhenTheRigGrabsWithTheTrigger()
+    {
+        yield return Load();
+        var asset = ScriptableObject.CreateInstance<UnityEngine.InputSystem.InputActionAsset>();
+        var map = UnityEngine.InputSystem.InputActionSetupExtensions.AddActionMap(asset, "Right Interaction");
+        UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Activate", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{RightHand}/trigger");
+        var triggerRef = UnityEngine.InputSystem.InputActionReference.Create(map.FindAction("Activate"));
+        // A hand pointer, switched off as the rig's are with no headset connected.
+        var hand = new GameObject("Trigger-Grab Hand");
+        hand.SetActive(false);
+        var rig = hand.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>();
+        var reader = UnityEngine.XR.Interaction.Toolkit.Inputs.Readers.XRInputButtonReader.InputSourceMode.InputActionReference;
+        rig.selectInput.inputSourceMode = reader;
+        rig.selectInput.inputActionReferencePerformed = triggerRef;
+        rig.activateInput.inputSourceMode = reader;
+        rig.activateInput.inputActionReferencePerformed = triggerRef;
+
+        var grab = Object.FindAnyObjectByType<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        Vector2 at = Camera.main.WorldToScreenPoint(grab.GetComponent<Collider>().bounds.center);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !grab.isHovered; i++) yield return null;
+        Assert.IsTrue(grab.isHovered, "the pointer never reached the cube");
+        Vector3 start = grab.transform.position;
+        EditorScriptedPointer.LeftPressed = true; EditorScriptedPointer.LeftHeld = true;
+        yield return null;
+        EditorScriptedPointer.LeftPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        bool held = grab.isSelected;
+        EditorScriptedPointer.Position = at + new Vector2(80, 0);
+        for (int i = 0; i < 20; i++) yield return null;
+        bool moved = Vector3.Distance(start, grab.transform.position) > 0.05f;
+        EditorScriptedPointer.LeftHeld = false; EditorScriptedPointer.LeftReleased = true;
+        yield return null;
+        EditorScriptedPointer.LeftReleased = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        EditorScriptedPointer.Clear();
+        Object.Destroy(asset);
+        Object.Destroy(hand);
+        Assert.IsTrue(held, "a left click should grab when the rig grabs with the trigger");
+        Assert.IsTrue(moved, "dragging with the click held should move it");
+        Assert.IsFalse(grab.isSelected, "letting go of the click should drop it");
+    }
+
+    [UnityTest]
+    public IEnumerator ClickDoesNotGrabWhenTheRigGrabsWithTheGrip()
+    {
+        yield return Load();
+        var grab = Object.FindAnyObjectByType<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        Vector2 at = Camera.main.WorldToScreenPoint(grab.GetComponent<Collider>().bounds.center);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !grab.isHovered; i++) yield return null;
+        EditorScriptedPointer.LeftPressed = true; EditorScriptedPointer.LeftHeld = true;
+        yield return null;
+        EditorScriptedPointer.LeftPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        bool held = grab.isSelected;
+        EditorScriptedPointer.LeftHeld = false; EditorScriptedPointer.LeftReleased = true;
+        yield return null;
+        EditorScriptedPointer.Clear();
+        Assert.IsFalse(held, "on a rig that grabs with the grip, a click must not grab (Command does)");
+    }
+
     // Found in a real app: a label-only panel without a Tracked Device Graphic Raycaster is not a problem; a panel with a button is.
     [UnityTest]
     public IEnumerator PanelWarningOnlyForPanelsWithButtons()

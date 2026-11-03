@@ -245,6 +245,9 @@ namespace XREditorControls
             triggerDown = true;
             triggerPressedFrame = Time.frameCount;
             pointer.SetTrigger(true);
+            // Some rigs grab with the trigger (Select wired to Activate). Then the headset's trigger grabs, so the click does too.
+            if (MousePointer.RigTriggerGrabs())
+                grab.StartFromTrigger();
         }
 
         void ReleaseTrigger()
@@ -254,6 +257,7 @@ namespace XREditorControls
                 return;
             triggerDown = false;
             pointer.SetTrigger(false);
+            grab.EndFromTrigger();
         }
 
         void OnGUI()
