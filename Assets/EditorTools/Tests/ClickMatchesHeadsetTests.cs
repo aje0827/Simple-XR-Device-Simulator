@@ -149,6 +149,26 @@ public class ClickMatchesHeadsetTests
         a.Disable(); b.Disable();
     }
 
+    // Found in a real app: a click on an item you're pointing at must fire its trigger (activate) event,
+    // because the headset's rig lets the trigger work on hovered items.
+    [UnityTest]
+    public IEnumerator ClickFiresTheTriggerOnAPointedAtItem()
+    {
+        yield return Load();
+        foreach (var rig in Object.FindObjectsByType<UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            rig.allowHoveredActivate = true;
+        var item = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        item.name = "Wearable Item";
+        item.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 1.5f + Vector3.left * 0.6f;
+        item.transform.localScale = Vector3.one * 0.3f;
+        var simple = item.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();
+        int activated = 0;
+        simple.activated.AddListener(_ => activated++);
+        yield return null;
+        yield return ClickAt(Camera.main.WorldToScreenPoint(item.transform.position));
+        Assert.AreEqual(1, activated, "a click on a pointed-at item should pull the trigger on it once, like the headset");
+    }
+
     [UnityTest]
     public IEnumerator CameraStaysAtHeadHeightWithoutAHeadset()
     {

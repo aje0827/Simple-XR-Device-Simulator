@@ -104,7 +104,11 @@ namespace XREditorControls
                 ownMouseInteractor.enableUIInteraction = true;
                 UseManualInput(ownMouseInteractor.activateInput);
                 UseManualInput(ownMouseInteractor.uiPressInput);
+                // The trigger works on something you're only pointing at, as it does on the Starter Assets rig.
+                // Overwritten below by the rig's own setting when there is one.
+                ownMouseInteractor.allowHoveredActivate = true;
                 // Reach what the controller's pointer reaches, so teleport spots don't light up under the mouse.
+                // Also take its trigger rule, so a click activates exactly what the headset's trigger activates.
                 foreach (XRBaseInteractor interactor in Object.FindObjectsByType<XRBaseInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 {
                     if (interactor == ownMouseInteractor || interactor is XRSocketInteractor || IsTeleportInteractor(interactor))
@@ -114,6 +118,8 @@ namespace XREditorControls
                         ownMouseInteractor.interactionLayers = interactor.interactionLayers;
                         if (interactor is XRRayInteractor ray)
                             ownMouseInteractor.raycastMask = ray.raycastMask;
+                        if (interactor is XRBaseInputInteractor input)
+                            ownMouseInteractor.allowHoveredActivate = input.allowHoveredActivate;
                         break;
                     }
                 }
