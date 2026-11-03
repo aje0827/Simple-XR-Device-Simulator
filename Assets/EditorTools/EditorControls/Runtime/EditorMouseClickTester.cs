@@ -174,6 +174,7 @@ namespace XREditorControls
                 return;
 
             StopGazeSelect();
+            ui.KeepMouseOffXrModule();
 
             // The toolkit reads the trigger a frame after it's set, so a press and release in the same frame
             // (a scripted click) lets go one frame later, or the press would never be seen.

@@ -173,6 +173,52 @@ public class ClickMatchesHeadsetTests
         Assert.AreEqual(1, activated, "a click on a pointed-at item should pull the trigger on it once, like the headset");
     }
 
+    // Found in a real app: one click pressed Next twice. The scene's XR UI Input Module had UI actions assigned
+    // (as Starter Assets does), so it read the real mouse as a second pointer on top of the controller ray.
+    [UnityTest]
+    public IEnumerator OneClickPressesOnceWhenTheModuleHasMouseActions()
+    {
+        yield return Load();
+        // Headless test runs have no window focus, and by default the Input System drops a mouse without focus.
+        var settings = UnityEngine.InputSystem.InputSystem.settings;
+        var oldBackground = settings.backgroundBehavior;
+        var oldEditor = settings.editorInputBehaviorInPlayMode;
+        settings.backgroundBehavior = UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+        settings.editorInputBehaviorInPlayMode = UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+        var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+        var asset = ScriptableObject.CreateInstance<UnityEngine.InputSystem.InputActionAsset>();
+        var map = UnityEngine.InputSystem.InputActionSetupExtensions.AddActionMap(asset, "UI");
+        var point = UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Point", UnityEngine.InputSystem.InputActionType.PassThrough, "<Mouse>/position");
+        var click = UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Click", UnityEngine.InputSystem.InputActionType.PassThrough, "<Mouse>/leftButton");
+        var module = Object.FindAnyObjectByType<XRUIInputModule>();
+        module.pointAction = UnityEngine.InputSystem.InputActionReference.Create(point);
+        module.leftClickAction = UnityEngine.InputSystem.InputActionReference.Create(click);
+        // The module only switches to its assigned actions when it turns on, as it does when a real scene loads.
+        module.enabled = false; module.enabled = true;
+        yield return null;
+
+        Button reset = FindReset();
+        // Some panels have a plain Graphic Raycaster next to the tracked-device one, so a mouse pointer can hit it too.
+        Canvas canvas = reset.GetComponentInParent<Canvas>().rootCanvas;
+        if (canvas.GetComponent<GraphicRaycaster>() == null || canvas.GetComponent<GraphicRaycaster>() is TrackedDeviceGraphicRaycaster)
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+        canvas.worldCamera = Camera.main;
+        yield return null;
+        clicks = 0; reset.onClick.AddListener(() => clicks++);
+        Vector2 p = ScreenPoint(reset);
+        // The real mouse goes down with the click, as it does with a real click.
+        UnityEngine.InputSystem.LowLevel.InputState.Change(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = p }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+        yield return null;
+        yield return ClickAt(p);
+        UnityEngine.InputSystem.LowLevel.InputState.Change(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = p });
+        for (int i = 0; i < 5; i++) yield return null;
+        UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+        Object.Destroy(asset);
+        settings.backgroundBehavior = oldBackground;
+        settings.editorInputBehaviorInPlayMode = oldEditor;
+        Assert.AreEqual(1, clicks, "one click must press the button once, not once for the ray and again for the mouse");
+    }
+
     // Found in a real app: a label-only panel without a Tracked Device Graphic Raycaster is not a problem; a panel with a button is.
     [UnityTest]
     public IEnumerator PanelWarningOnlyForPanelsWithButtons()

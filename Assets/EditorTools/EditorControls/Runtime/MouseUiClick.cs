@@ -42,12 +42,41 @@ namespace XREditorControls
             foreach (StandaloneInputModule oldModule in Object.FindObjectsByType<StandaloneInputModule>(FindObjectsSortMode.None))
                 oldModule.enabled = false;
 
-            xrModule = Object.FindAnyObjectByType<XRUIInputModule>();
-            if (xrModule == null)
-                return;
-            xrModule.enableMouseInput = false;
-            xrModule.enableTouchInput = false;
-            xrModule.pointerClick += OnClick;
+            KeepMouseOffXrModule();
+        }
+
+        /// <summary>
+        /// Runs every frame: the scene with the EventSystem can load after the controls (an additive controls scene).
+        /// The XR UI Input Module has two mouse paths. Enable Mouse Input covers its built-in one; when the module has
+        /// UI actions assigned (Starter Assets assigns XRI UI/Click, bound to the mouse), it reads those instead and
+        /// ignores that switch. Either way the real mouse pressed UI as a second pointer on top of the controller ray,
+        /// so one click pressed a button twice. Both are turned off; the ray is the only thing that presses.
+        /// </summary>
+        public void KeepMouseOffXrModule()
+        {
+            if (xrModule == null || !xrModule.isActiveAndEnabled)
+            {
+                XRUIInputModule found = Object.FindAnyObjectByType<XRUIInputModule>();
+                if (found == null)
+                    return;
+                if (found != xrModule)
+                {
+                    if (xrModule != null)
+                        xrModule.pointerClick -= OnClick;
+                    xrModule = found;
+                    xrModule.pointerClick += OnClick;
+                }
+            }
+            if (xrModule.enableMouseInput)
+                xrModule.enableMouseInput = false;
+            if (xrModule.enableTouchInput)
+                xrModule.enableTouchInput = false;
+            if (xrModule.leftClickAction != null)
+                xrModule.leftClickAction = null;
+            if (xrModule.rightClickAction != null)
+                xrModule.rightClickAction = null;
+            if (xrModule.middleClickAction != null)
+                xrModule.middleClickAction = null;
         }
 
         /// <summary>Warns in the Console, once on Play, about anything that stops a controller ray pressing UI.</summary>
