@@ -164,9 +164,41 @@ public class ClickMatchesHeadsetTests
         var simple = item.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();
         int activated = 0;
         simple.activated.AddListener(_ => activated++);
-        yield return null;
-        yield return ClickAt(Camera.main.WorldToScreenPoint(item.transform.position));
+        // Wait until the pointer is on the item, so this checks the trigger, not how fast hovering starts.
+        Vector2 at = Camera.main.WorldToScreenPoint(item.transform.position);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !simple.isHovered; i++) yield return null;
+        Assert.IsTrue(simple.isHovered, "the pointer never reached the item");
+        yield return ClickAt(at);
         Assert.AreEqual(1, activated, "a click on a pointed-at item should pull the trigger on it once, like the headset");
+    }
+
+    // Found in a real app: a label-only panel without a Tracked Device Graphic Raycaster is not a problem; a panel with a button is.
+    [UnityTest]
+    public IEnumerator PanelWarningOnlyForPanelsWithButtons()
+    {
+        yield return Load();
+        GameObject MakePanel(string name, bool withButton)
+        {
+            var go = new GameObject(name, typeof(Canvas), typeof(GraphicRaycaster));
+            go.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            var child = new GameObject("Content", typeof(RectTransform), typeof(Text));
+            child.transform.SetParent(go.transform, false);
+            if (withButton) child.AddComponent<Button>();
+            return go;
+        }
+        MakePanel("Label Only Panel", false);
+        MakePanel("Button Panel", true);
+        yield return null;
+
+        var tester = Object.FindAnyObjectByType<EditorMouseClickTester>();
+        Assert.IsNotNull(tester, "no EditorMouseClickTester in the sample");
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        object ui = typeof(EditorMouseClickTester).GetField("ui", flags).GetValue(tester);
+        ui.GetType().GetMethod("CheckScene").Invoke(ui, null);
+        string problem = (string)ui.GetType().GetProperty("Problem").GetValue(ui);
+        Assert.IsTrue(problem.Contains("Button Panel"), "a panel with a button and no tracked-device raycaster should be named");
+        Assert.IsFalse(problem.Contains("Label Only Panel"), "a panel with nothing to press should not be named");
     }
 
     [UnityTest]

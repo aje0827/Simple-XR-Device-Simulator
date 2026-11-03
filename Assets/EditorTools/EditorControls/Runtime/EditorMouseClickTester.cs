@@ -61,6 +61,8 @@ namespace XREditorControls
         public bool showInputLabel = false;
 
         [Header("Debug")]
+        [Tooltip("Show scene setup problems (like a panel controller rays can't press) in the top left of the Game view. They are written to the Console either way.")]
+        public bool showSceneWarnings = true;
         [Tooltip("Write each grab and teleport to the Console.")]
         public bool logWorldHits = false;
         [Tooltip("Write each UI click to the Console.")]
@@ -259,7 +261,7 @@ namespace XREditorControls
                 return;
             if (showInputLabel)
                 inputLabel?.Draw();
-            if (ui != null && ui.Problem.Length > 0)
+            if (showSceneWarnings && ui != null && ui.Problem.Length > 0)
                 DrawProblem(ui.Problem);
         }
 

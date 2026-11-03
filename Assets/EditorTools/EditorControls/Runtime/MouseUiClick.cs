@@ -67,7 +67,8 @@ namespace XREditorControls
             foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (canvas.renderMode == RenderMode.WorldSpace && canvas.isRootCanvas
-                    && canvas.GetComponent<GraphicRaycaster>() != null && canvas.GetComponent<TrackedDeviceGraphicRaycaster>() == null)
+                    && canvas.GetComponent<GraphicRaycaster>() != null && canvas.GetComponent<TrackedDeviceGraphicRaycaster>() == null
+                    && canvas.GetComponentInChildren<Selectable>(true) != null) // a panel with nothing to press doesn't need it
                     missing.Add(canvas.name);
             }
             if (missing.Count > 0)
