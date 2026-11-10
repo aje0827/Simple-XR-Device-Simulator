@@ -149,6 +149,169 @@ public class ClickMatchesHeadsetTests
         a.Disable(); b.Disable();
     }
 
+    // Found in a real app: a click on an item you're pointing at must fire its trigger (activate) event,
+    // because the headset's rig lets the trigger work on hovered items.
+    [UnityTest]
+    public IEnumerator ClickFiresTheTriggerOnAPointedAtItem()
+    {
+        yield return Load();
+        foreach (var rig in Object.FindObjectsByType<UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            rig.allowHoveredActivate = true;
+        var item = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        item.name = "Wearable Item";
+        item.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 1.5f + Vector3.left * 0.6f;
+        item.transform.localScale = Vector3.one * 0.3f;
+        var simple = item.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();
+        int activated = 0;
+        simple.activated.AddListener(_ => activated++);
+        // Wait until the pointer is on the item, so this checks the trigger, not how fast hovering starts.
+        Vector2 at = Camera.main.WorldToScreenPoint(item.transform.position);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !simple.isHovered; i++) yield return null;
+        Assert.IsTrue(simple.isHovered, "the pointer never reached the item");
+        yield return ClickAt(at);
+        Assert.AreEqual(1, activated, "a click on a pointed-at item should pull the trigger on it once, like the headset");
+    }
+
+    // Found in a real app: one click pressed Next twice. The scene's XR UI Input Module had UI actions assigned
+    // (as Starter Assets does), so it read the real mouse as a second pointer on top of the controller ray.
+    [UnityTest]
+    public IEnumerator OneClickPressesOnceWhenTheModuleHasMouseActions()
+    {
+        yield return Load();
+        // Headless test runs have no window focus, and by default the Input System drops a mouse without focus.
+        var settings = UnityEngine.InputSystem.InputSystem.settings;
+        var oldBackground = settings.backgroundBehavior;
+        var oldEditor = settings.editorInputBehaviorInPlayMode;
+        settings.backgroundBehavior = UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+        settings.editorInputBehaviorInPlayMode = UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+        var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+        var asset = ScriptableObject.CreateInstance<UnityEngine.InputSystem.InputActionAsset>();
+        var map = UnityEngine.InputSystem.InputActionSetupExtensions.AddActionMap(asset, "UI");
+        var point = UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Point", UnityEngine.InputSystem.InputActionType.PassThrough, "<Mouse>/position");
+        var click = UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Click", UnityEngine.InputSystem.InputActionType.PassThrough, "<Mouse>/leftButton");
+        var module = Object.FindAnyObjectByType<XRUIInputModule>();
+        module.pointAction = UnityEngine.InputSystem.InputActionReference.Create(point);
+        module.leftClickAction = UnityEngine.InputSystem.InputActionReference.Create(click);
+        // The module only switches to its assigned actions when it turns on, as it does when a real scene loads.
+        module.enabled = false; module.enabled = true;
+        yield return null;
+
+        Button reset = FindReset();
+        // Some panels have a plain Graphic Raycaster next to the tracked-device one, so a mouse pointer can hit it too.
+        Canvas canvas = reset.GetComponentInParent<Canvas>().rootCanvas;
+        if (canvas.GetComponent<GraphicRaycaster>() == null || canvas.GetComponent<GraphicRaycaster>() is TrackedDeviceGraphicRaycaster)
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+        canvas.worldCamera = Camera.main;
+        yield return null;
+        clicks = 0; reset.onClick.AddListener(() => clicks++);
+        Vector2 p = ScreenPoint(reset);
+        // The real mouse goes down with the click, as it does with a real click.
+        UnityEngine.InputSystem.LowLevel.InputState.Change(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = p }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+        yield return null;
+        yield return ClickAt(p);
+        UnityEngine.InputSystem.LowLevel.InputState.Change(mouse, new UnityEngine.InputSystem.LowLevel.MouseState { position = p });
+        for (int i = 0; i < 5; i++) yield return null;
+        UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+        Object.Destroy(asset);
+        settings.backgroundBehavior = oldBackground;
+        settings.editorInputBehaviorInPlayMode = oldEditor;
+        Assert.AreEqual(1, clicks, "one click must press the button once, not once for the ray and again for the mouse");
+    }
+
+    // Found in a real app: Some rigs grab with the trigger (Select wired to Activate), so their menus move with the
+    // trigger in the headset. A left click must then grab and move them too, and let go on release.
+    [UnityTest]
+    public IEnumerator ClickGrabsWhenTheRigGrabsWithTheTrigger()
+    {
+        yield return Load();
+        var asset = ScriptableObject.CreateInstance<UnityEngine.InputSystem.InputActionAsset>();
+        var map = UnityEngine.InputSystem.InputActionSetupExtensions.AddActionMap(asset, "Right Interaction");
+        UnityEngine.InputSystem.InputActionSetupExtensions.AddAction(map, "Activate", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{RightHand}/trigger");
+        var triggerRef = UnityEngine.InputSystem.InputActionReference.Create(map.FindAction("Activate"));
+        // A hand pointer, switched off as the rig's are with no headset connected.
+        var hand = new GameObject("Trigger-Grab Hand");
+        hand.SetActive(false);
+        var rig = hand.AddComponent<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>();
+        var reader = UnityEngine.XR.Interaction.Toolkit.Inputs.Readers.XRInputButtonReader.InputSourceMode.InputActionReference;
+        rig.selectInput.inputSourceMode = reader;
+        rig.selectInput.inputActionReferencePerformed = triggerRef;
+        rig.activateInput.inputSourceMode = reader;
+        rig.activateInput.inputActionReferencePerformed = triggerRef;
+
+        var grab = Object.FindAnyObjectByType<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        Vector2 at = Camera.main.WorldToScreenPoint(grab.GetComponent<Collider>().bounds.center);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !grab.isHovered; i++) yield return null;
+        Assert.IsTrue(grab.isHovered, "the pointer never reached the cube");
+        Vector3 start = grab.transform.position;
+        EditorScriptedPointer.LeftPressed = true; EditorScriptedPointer.LeftHeld = true;
+        yield return null;
+        EditorScriptedPointer.LeftPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        bool held = grab.isSelected;
+        EditorScriptedPointer.Position = at + new Vector2(80, 0);
+        for (int i = 0; i < 20; i++) yield return null;
+        bool moved = Vector3.Distance(start, grab.transform.position) > 0.05f;
+        EditorScriptedPointer.LeftHeld = false; EditorScriptedPointer.LeftReleased = true;
+        yield return null;
+        EditorScriptedPointer.LeftReleased = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        EditorScriptedPointer.Clear();
+        Object.Destroy(asset);
+        Object.Destroy(hand);
+        Assert.IsTrue(held, "a left click should grab when the rig grabs with the trigger");
+        Assert.IsTrue(moved, "dragging with the click held should move it");
+        Assert.IsFalse(grab.isSelected, "letting go of the click should drop it");
+    }
+
+    [UnityTest]
+    public IEnumerator ClickDoesNotGrabWhenTheRigGrabsWithTheGrip()
+    {
+        yield return Load();
+        var grab = Object.FindAnyObjectByType<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        Vector2 at = Camera.main.WorldToScreenPoint(grab.GetComponent<Collider>().bounds.center);
+        EditorScriptedPointer.Active = true; EditorScriptedPointer.Position = at;
+        for (int i = 0; i < 120 && !grab.isHovered; i++) yield return null;
+        EditorScriptedPointer.LeftPressed = true; EditorScriptedPointer.LeftHeld = true;
+        yield return null;
+        EditorScriptedPointer.LeftPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        bool held = grab.isSelected;
+        EditorScriptedPointer.LeftHeld = false; EditorScriptedPointer.LeftReleased = true;
+        yield return null;
+        EditorScriptedPointer.Clear();
+        Assert.IsFalse(held, "on a rig that grabs with the grip, a click must not grab (Command does)");
+    }
+
+    // Found in a real app: a label-only panel without a Tracked Device Graphic Raycaster is not a problem; a panel with a button is.
+    [UnityTest]
+    public IEnumerator PanelWarningOnlyForPanelsWithButtons()
+    {
+        yield return Load();
+        GameObject MakePanel(string name, bool withButton)
+        {
+            var go = new GameObject(name, typeof(Canvas), typeof(GraphicRaycaster));
+            go.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            var child = new GameObject("Content", typeof(RectTransform), typeof(Text));
+            child.transform.SetParent(go.transform, false);
+            if (withButton) child.AddComponent<Button>();
+            return go;
+        }
+        MakePanel("Label Only Panel", false);
+        MakePanel("Button Panel", true);
+        yield return null;
+
+        var tester = Object.FindAnyObjectByType<EditorMouseClickTester>();
+        Assert.IsNotNull(tester, "no EditorMouseClickTester in the sample");
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        object ui = typeof(EditorMouseClickTester).GetField("ui", flags).GetValue(tester);
+        ui.GetType().GetMethod("CheckScene").Invoke(ui, null);
+        string problem = (string)ui.GetType().GetProperty("Problem").GetValue(ui);
+        Assert.IsTrue(problem.Contains("Button Panel"), "a panel with a button and no tracked-device raycaster should be named");
+        Assert.IsFalse(problem.Contains("Label Only Panel"), "a panel with nothing to press should not be named");
+    }
+
     [UnityTest]
     public IEnumerator CameraStaysAtHeadHeightWithoutAHeadset()
     {

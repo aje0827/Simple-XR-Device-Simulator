@@ -62,7 +62,7 @@ namespace XREditorControls
             ReleasePinWhenSettled();
             if (EditorControlsInput.CommandPressedThisFrame)
                 Start();
-            if (EditorControlsInput.CommandReleasedThisFrame)
+            if (EditorControlsInput.CommandReleasedThisFrame && !heldByTrigger)
                 End();
 
             // Control while holding: the mouse turns the object instead of moving it. A key, not a click, because a
@@ -83,8 +83,26 @@ namespace XREditorControls
                 pendingScroll += EditorControlsInput.ScrollNotches;
         }
 
+        bool heldByTrigger;
+
+        /// <summary>The trigger grabs, for rigs that grab with the trigger. Lets go with the trigger, not with Command.</summary>
+        public void StartFromTrigger()
+        {
+            if (Held != null)
+                return;
+            Start();
+            heldByTrigger = Held != null;
+        }
+
+        public void EndFromTrigger()
+        {
+            if (heldByTrigger)
+                End();
+        }
+
         public void End()
         {
+            heldByTrigger = false;
             if (turning)
                 UnlockCursor();
             turning = false;

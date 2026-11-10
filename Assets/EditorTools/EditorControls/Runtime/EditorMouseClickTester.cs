@@ -61,6 +61,8 @@ namespace XREditorControls
         public bool showInputLabel = false;
 
         [Header("Debug")]
+        [Tooltip("Show scene setup problems (like a panel controller rays can't press) in the top left of the Game view. They are written to the Console either way.")]
+        public bool showSceneWarnings = true;
         [Tooltip("Write each grab and teleport to the Console.")]
         public bool logWorldHits = false;
         [Tooltip("Write each UI click to the Console.")]
@@ -172,6 +174,7 @@ namespace XREditorControls
                 return;
 
             StopGazeSelect();
+            ui.KeepMouseOffXrModule();
 
             // The toolkit reads the trigger a frame after it's set, so a press and release in the same frame
             // (a scripted click) lets go one frame later, or the press would never be seen.
@@ -242,6 +245,9 @@ namespace XREditorControls
             triggerDown = true;
             triggerPressedFrame = Time.frameCount;
             pointer.SetTrigger(true);
+            // Some rigs grab with the trigger (Select wired to Activate). Then the headset's trigger grabs, so the click does too.
+            if (MousePointer.RigTriggerGrabs())
+                grab.StartFromTrigger();
         }
 
         void ReleaseTrigger()
@@ -251,6 +257,7 @@ namespace XREditorControls
                 return;
             triggerDown = false;
             pointer.SetTrigger(false);
+            grab.EndFromTrigger();
         }
 
         void OnGUI()
@@ -259,7 +266,7 @@ namespace XREditorControls
                 return;
             if (showInputLabel)
                 inputLabel?.Draw();
-            if (ui != null && ui.Problem.Length > 0)
+            if (showSceneWarnings && ui != null && ui.Problem.Length > 0)
                 DrawProblem(ui.Problem);
         }
 

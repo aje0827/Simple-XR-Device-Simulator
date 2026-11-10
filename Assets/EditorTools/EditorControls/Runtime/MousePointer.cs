@@ -104,7 +104,11 @@ namespace XREditorControls
                 ownMouseInteractor.enableUIInteraction = true;
                 UseManualInput(ownMouseInteractor.activateInput);
                 UseManualInput(ownMouseInteractor.uiPressInput);
+                // The trigger works on something you're only pointing at, as it does on the Starter Assets rig.
+                // Overwritten below by the rig's own setting when there is one.
+                ownMouseInteractor.allowHoveredActivate = true;
                 // Reach what the controller's pointer reaches, so teleport spots don't light up under the mouse.
+                // Also take its trigger rule, so a click activates exactly what the headset's trigger activates.
                 foreach (XRBaseInteractor interactor in Object.FindObjectsByType<XRBaseInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 {
                     if (interactor == ownMouseInteractor || interactor is XRSocketInteractor || IsTeleportInteractor(interactor))
@@ -114,11 +118,34 @@ namespace XREditorControls
                         ownMouseInteractor.interactionLayers = interactor.interactionLayers;
                         if (interactor is XRRayInteractor ray)
                             ownMouseInteractor.raycastMask = ray.raycastMask;
+                        if (interactor is XRBaseInputInteractor input)
+                            ownMouseInteractor.allowHoveredActivate = input.allowHoveredActivate;
                         break;
                     }
                 }
                 return ownMouseInteractor;
             }
+        }
+
+        /// <summary>
+        /// True when the headset's rig grabs with the trigger: one of its pointers has Select wired to the same
+        /// action as Activate (some rigs do this so menus and objects move with the trigger). Then a left click grabs too.
+        /// Checked on each click, so a scene that loads after the controls is still read.
+        /// </summary>
+        public static bool RigTriggerGrabs()
+        {
+            foreach (XRBaseInputInteractor input in Object.FindObjectsByType<XRBaseInputInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (input is XRSocketInteractor || IsTeleportInteractor(input) || input is XRGazeInteractor)
+                    continue;
+                if (input.selectInput.inputSourceMode != XRInputButtonReader.InputSourceMode.InputActionReference)
+                    continue;
+                var select = input.selectInput.inputActionReferencePerformed;
+                var activate = input.activateInput.inputActionReferencePerformed;
+                if (select != null && activate != null && select.action != null && activate.action != null && select.action.id == activate.action.id)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>Holds teleport spots for the arc when the rig has no live teleport ray. Points nowhere, so it never hovers.</summary>
