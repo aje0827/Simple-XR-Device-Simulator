@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.0.1] - 2026-11-11
+
+### Fixed
+- A right click teleports anywhere on a Teleportation Area whose collider is on another object, as in Unity's VR template. Before, only teleport spots worked there.
+
 ## [3.0.0] - 2026-11-11
 
 ### Changed
