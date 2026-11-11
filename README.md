@@ -74,6 +74,10 @@ Recording a demo? Turn on **Show Input Label** on the prefab. It shows the contr
 - The XR Interaction Toolkit 3.x and the Input System. Package Manager installs both with this package if they're missing
 - Built and tested on macOS. On Windows, the Windows key takes the place of Command. Windows hasn't been tested yet
 
+## Support
+
+It's free. If it saves you some headset time, you can [buy me a coffee](https://ko-fi.com/aje0827).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
