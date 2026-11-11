@@ -57,7 +57,7 @@ namespace SimpleXRDeviceSimulator
 
             Ray ray = pointer.Ray;
             Transform cam = pointer.Camera.transform;
-            Vector3 offset = owner.laserHandOffset;
+            Vector3 offset = owner.HandOffset;
             Vector3 start = cam.position + cam.right * offset.x + cam.up * offset.y + cam.forward * offset.z;
             Vector3 end;
             Color drawColor = color;

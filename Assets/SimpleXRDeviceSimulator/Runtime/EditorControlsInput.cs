@@ -3,6 +3,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace SimpleXRDeviceSimulator
 {
@@ -65,6 +67,29 @@ namespace SimpleXRDeviceSimulator
         // 1 and 2 stand in for the controller's A and B buttons. Not the A and B keys: W A S D stays free for walking.
         public static bool PrimaryButtonHeld => Scripted ? EditorScriptedPointer.PrimaryHeld : Held(Keys?.digit1Key);
         public static bool SecondaryButtonHeld => Scripted ? EditorScriptedPointer.SecondaryHeld : Held(Keys?.digit2Key);
+
+        // H switches the mouse between the right and left controller.
+        public static bool SwitchHandPressedThisFrame => Scripted ? EditorScriptedPointer.SwitchHandPressed : Pressed(Keys?.hKey) && !TypingInTextField();
+        public static bool SwitchHandHeld => Scripted ? EditorScriptedPointer.SwitchHandPressed : Held(Keys?.hKey) && !TypingInTextField();
+
+        /// <summary>True while a text field has focus: typing a 1, 2 or H there isn't pressing a button.</summary>
+        public static bool TypingInTextField()
+        {
+            GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+            if (selected == null)
+                return false;
+            InputField field = selected.GetComponent<InputField>();
+            if (field != null)
+                return field.isFocused;
+            foreach (Component component in selected.GetComponents<Component>())
+            {
+                if (component == null || component.GetType().Name != "TMP_InputField")
+                    continue;
+                var focused = component.GetType().GetProperty("isFocused");
+                return focused != null && (bool)focused.GetValue(component);
+            }
+            return false;
+        }
 
         // Arrow keys stand in for the controller's thumbstick (left and right snap turn).
         public static bool ArrowPressedThisFrame(KeyCode key) => Pressed(Arrow(key));

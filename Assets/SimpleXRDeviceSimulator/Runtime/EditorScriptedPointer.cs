@@ -26,6 +26,7 @@ namespace SimpleXRDeviceSimulator
         public static bool CommandReleased;
         public static bool PrimaryHeld;
         public static bool SecondaryHeld;
+        public static bool SwitchHandPressed;
 
         public static void Clear()
         {
@@ -44,6 +45,7 @@ namespace SimpleXRDeviceSimulator
             CommandReleased = false;
             PrimaryHeld = false;
             SecondaryHeld = false;
+            SwitchHandPressed = false;
         }
     }
 }

@@ -151,6 +151,52 @@ public class ClickMatchesHeadsetTests
         a.Disable(); b.Disable();
     }
 
+    [UnityTest]
+    public IEnumerator HSwitchesToTheLeftControllerWhere1And2AreXAndY()
+    {
+        yield return Load();
+        var x = new UnityEngine.InputSystem.InputAction("X", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{LeftHand}/primaryButton");
+        var y = new UnityEngine.InputSystem.InputAction("Y", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{LeftHand}/secondaryButton");
+        var a = new UnityEngine.InputSystem.InputAction("A", UnityEngine.InputSystem.InputActionType.Button, "<XRController>{RightHand}/primaryButton");
+        x.Enable(); y.Enable(); a.Enable();
+        var tester = Object.FindAnyObjectByType<EditorMouseClickTester>();
+        Assert.IsFalse(tester.leftHand, "starts on the right hand");
+
+        EditorScriptedPointer.Active = true;
+        EditorScriptedPointer.Position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+        EditorScriptedPointer.SwitchHandPressed = true;
+        yield return null;
+        EditorScriptedPointer.SwitchHandPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(tester.leftHand, "H should switch to the left hand");
+
+        var laser = GameObject.Find("Simple XR Device Simulator Laser").GetComponent<LineRenderer>();
+        Vector3 start = Camera.main.transform.InverseTransformPoint(laser.GetPosition(0));
+        Assert.Less(start.x, 0f, "the laser should start from the left of the view");
+
+        EditorScriptedPointer.PrimaryHeld = true;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(x.IsPressed(), "on the left hand, holding 1 should press X");
+        Assert.IsFalse(a.IsPressed(), "and not A");
+        EditorScriptedPointer.PrimaryHeld = false;
+        EditorScriptedPointer.SecondaryHeld = true;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(y.IsPressed(), "on the left hand, holding 2 should press Y");
+        EditorScriptedPointer.SecondaryHeld = false;
+
+        EditorScriptedPointer.SwitchHandPressed = true;
+        yield return null;
+        EditorScriptedPointer.SwitchHandPressed = false;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsFalse(tester.leftHand, "H again goes back to the right hand");
+        EditorScriptedPointer.PrimaryHeld = true;
+        for (int i = 0; i < 3; i++) yield return null;
+        Assert.IsTrue(a.IsPressed(), "back on the right hand, 1 is A again");
+        Assert.IsFalse(x.IsPressed());
+        EditorScriptedPointer.Clear();
+        x.Disable(); y.Disable(); a.Disable();
+    }
+
     // Found in a real app: a click on an item you're pointing at must fire its trigger (activate) event,
     // because the headset's rig lets the trigger work on hovered items.
     [UnityTest]
