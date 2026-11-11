@@ -19,16 +19,18 @@ It works with the XR Interaction Toolkit interactables and UI already in your sc
 In Unity, open **Window > Package Manager**, click **+**, choose **Add package from git URL**, and paste this link:
 
 ```
-https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/EditorTools/EditorControls
+https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/SimpleXRDeviceSimulator
 ```
 
 Use this exact link. The page address from your browser won't install.
+
+To stay on one version, add its tag to the end of the link, like `#v3.0.0`. What changed in each version is in the [changelog](Assets/SimpleXRDeviceSimulator/CHANGELOG.md).
 
 If Unity asks to enable the Input System's backends and restart, click Yes. The package reads the mouse and keyboard through it.
 
 
 
-**Try it:** click **Tools > Simple XR Device Simulator > Open Basic Scene** and press Play. The controls are listed on a panel in the scene.
+**Try it:** click **Tools > Simple XR Device Simulator > Open Test Scene** and press Play. The controls are listed on a panel in the scene.
 
 **Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera and the event system on its own. It only runs in the Editor, so it has no effect on a headset build.
 

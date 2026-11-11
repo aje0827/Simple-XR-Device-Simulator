@@ -1,0 +1,28 @@
+{
+  "name": "com.albertelias.simple-xr-device-simulator",
+  "version": "3.0.0",
+  "displayName": "Simple XR Device Simulator",
+  "description": "Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpad and a keyboard. The mouse acts as one controller and works with the interactables and UI already in your scene.",
+  "documentationUrl": "https://github.com/aje0827/Simple-XR-Device-Simulator#readme",
+  "changelogUrl": "https://github.com/aje0827/Simple-XR-Device-Simulator/blob/main/Assets/SimpleXRDeviceSimulator/CHANGELOG.md",
+  "licensesUrl": "https://github.com/aje0827/Simple-XR-Device-Simulator/blob/main/LICENSE",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.xr.interaction.toolkit": "3.0.0",
+    "com.unity.inputsystem": "1.7.0",
+    "com.unity.ugui": "1.0.0"
+  },
+  "keywords": ["xr", "vr", "editor", "testing", "simulator", "xr interaction toolkit"],
+  "author": {
+    "name": "Albert Elias",
+    "url": "https://github.com/aje0827"
+  },
+  "license": "MIT",
+  "samples": [
+    {
+      "displayName": "Test Scene",
+      "description": "A table, a cube to grab, a Reset button and three teleport spots, with the controls already in the scene and listed on a panel. Open the scene and press Play.",
+      "path": "Samples~/Test Scene"
+    }
+  ]
+}
