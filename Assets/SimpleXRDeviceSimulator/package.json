@@ -1,6 +1,6 @@
 {
   "name": "com.albertelias.simple-xr-device-simulator",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "displayName": "Simple XR Device Simulator",
   "description": "Test an XR Interaction Toolkit scene in the Unity Editor with a mouse or trackpad and a keyboard. The mouse acts as one controller and works with the interactables and UI already in your scene.",
   "documentationUrl": "https://github.com/aje0827/Simple-XR-Device-Simulator#readme",

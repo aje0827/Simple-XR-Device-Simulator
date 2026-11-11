@@ -61,7 +61,7 @@ namespace SimpleXRDeviceSimulator
             for (int i = 0; i < count; i++)
             {
                 RaycastHit hit = hits[i];
-                if (hit.collider.isTrigger && hit.collider.GetComponentInParent<XRBaseInteractable>() == null)
+                if (hit.collider.isTrigger && FindInteractable<XRBaseInteractable>(hit.collider) == null)
                     continue;
                 if (hit.distance < bestDistance)
                 {
@@ -73,6 +73,26 @@ namespace SimpleXRDeviceSimulator
             if (found)
                 LastHitPoint = best.point;
             return found;
+        }
+
+        /// <summary>
+        /// The interactable a collider belongs to, found the way the controller finds it: on the collider's own
+        /// object or a parent, or listed in an interactable's Colliders on another object (a Teleportation Area
+        /// pointing at the floor, as in Unity's VR template).
+        /// </summary>
+        public static T FindInteractable<T>(Collider collider) where T : class, IXRInteractable
+        {
+            if (collider == null)
+                return null;
+            T own = collider.GetComponentInParent<T>();
+            if (own != null)
+                return own;
+            foreach (XRInteractionManager manager in Object.FindObjectsByType<XRInteractionManager>(FindObjectsSortMode.None))
+            {
+                if (manager.TryGetInteractableForCollider(collider, out IXRInteractable found) && found is T match)
+                    return match;
+            }
+            return null;
         }
 
         /// <summary>Any active controller interactor (ray or near-far). wantTeleport picks the teleport one.</summary>

@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
+using Unity.XR.CoreUtils;
 using SimpleXRDeviceSimulator;
 
 public class ClickMatchesHeadsetTests
@@ -317,5 +319,55 @@ public class ClickMatchesHeadsetTests
     {
         yield return Load();
         Assert.AreEqual(1.6f, Camera.main.transform.position.y, 0.01f, "the head tracking must not pull the camera to the floor with no headset");
+    }
+    // Unity's VR template puts the Teleportation Area on its own object and lists the floor's collider in it.
+    // The headset teleports anywhere on that floor, so a right click there must too.
+    [UnityTest]
+    public IEnumerator RightClickTeleportsOntoAnAreaWhoseColliderIsOnAnotherObject()
+    {
+        yield return Load();
+        Collider floor = GameObject.Find("Floor").GetComponent<Collider>();
+        var areaObject = new GameObject("Teleport Area");
+        areaObject.SetActive(false);
+        var area = areaObject.AddComponent<TeleportationArea>();
+        area.colliders.Clear();
+        area.colliders.Add(floor);
+        areaObject.SetActive(true);
+        yield return null;
+
+        XROrigin origin = Object.FindAnyObjectByType<XROrigin>();
+        Vector3 start = origin.transform.position;
+        Vector3 target = Vector3.zero;
+        Vector2 screen = Vector2.zero;
+        bool found = false;
+        foreach (Vector3 offset in new[] { new Vector3(-1.5f, 0, 2f), new Vector3(1.5f, 0, 2f), new Vector3(-2f, 0, 1f), new Vector3(2f, 0, 1f) })
+        {
+            Vector3 candidate = start + offset;
+            screen = Camera.main.WorldToScreenPoint(candidate);
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(screen), out RaycastHit hit, 100f) && hit.collider == floor)
+            {
+                target = hit.point;
+                found = true;
+                break;
+            }
+        }
+        Assume.That(found, "no clear spot on the floor in view");
+
+        EditorScriptedPointer.Active = true;
+        EditorScriptedPointer.Position = screen;
+        for (int i = 0; i < 5; i++) yield return null;
+        EditorScriptedPointer.RightPressed = true; EditorScriptedPointer.RightHeld = true;
+        yield return null;
+        EditorScriptedPointer.RightPressed = false;
+        for (int i = 0; i < 5; i++) yield return null;
+        EditorScriptedPointer.RightHeld = false; EditorScriptedPointer.RightReleased = true;
+        yield return null;
+        EditorScriptedPointer.RightReleased = false;
+        for (int i = 0; i < 10; i++) yield return null;
+        EditorScriptedPointer.Clear();
+
+        Vector3 head = Camera.main.transform.position;
+        Assert.Less(Vector2.Distance(new Vector2(head.x, head.z), new Vector2(target.x, target.z)), 0.3f,
+            "a right click on a teleport area's floor should move the rig there, as the headset does");
     }
 }

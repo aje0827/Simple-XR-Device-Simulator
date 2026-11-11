@@ -1,6 +1,6 @@
 {
   "name": "SimpleXRDeviceSimulator.Tests",
-  "references": ["SimpleXRDeviceSimulator", "UnityEngine.TestRunner", "UnityEditor.TestRunner", "Unity.XR.Interaction.Toolkit", "UnityEngine.UI", "Unity.InputSystem", "Unity.TextMeshPro"],
+  "references": ["SimpleXRDeviceSimulator", "UnityEngine.TestRunner", "UnityEditor.TestRunner", "Unity.XR.Interaction.Toolkit", "UnityEngine.UI", "Unity.InputSystem", "Unity.TextMeshPro", "Unity.XR.CoreUtils"],
   "includePlatforms": [],
   "overrideReferences": true,
   "precompiledReferences": ["nunit.framework.dll"],
