@@ -14,6 +14,8 @@ Press Play and the mouse becomes your controller. You can look around, click but
 
 It works with the XR Interaction Toolkit interactables and UI already in your scene. They respond the same way they do to a real controller, so you can test them as they are.
 
+It's free. If it saves you some headset time, you can [buy me a coffee](https://ko-fi.com/aje0827).
+
 ## Install
 
 In Unity, open **Window > Package Manager**, click **+**, choose **Add package from git URL**, and paste this link:
@@ -31,8 +33,6 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 **Try it:** click **Tools > Simple XR Device Simulator > Open Test Scene** and press Play. The controls are listed on a panel in the scene.
 
 **Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera and the event system on its own. It only runs in the Editor, so it has no effect on a headset build.
-
-It's free. If it saves you some headset time, you can [buy me a coffee](https://ko-fi.com/aje0827).
 
 ## What it supports
 
