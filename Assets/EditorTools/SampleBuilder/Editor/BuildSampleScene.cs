@@ -1,6 +1,6 @@
-// Builds the package's "Basic Scene" sample. Not part of the package: it lives outside the package folder.
-// Run Tools > Simple XR Device Simulator > Build Sample Scene. It saves the scene in Assets/BasicSceneSource and
-// copies that folder, .meta files included, into the package's Samples~/Basic Scene for the Samples tab.
+// Builds the package's "Test Scene" sample. Not part of the package: it lives outside the package folder.
+// Run Tools > Simple XR Device Simulator > Build Sample Scene. It saves the scene in Assets/TestSceneSource and
+// copies that folder, .meta files included, into the package's Samples~/Test Scene for the Samples tab.
 using UnityEditor;
 using UnityEditor.Events;
 using UnityEditor.SceneManagement;
@@ -21,8 +21,8 @@ using SimpleXRDeviceSimulator.Sample;
 
 static class BuildSampleScene
 {
-    const string Folder = "Assets/BasicSceneSource";
-    const string PackageSample = "Assets/SimpleXRDeviceSimulator/Samples~/Basic Scene";
+    const string Folder = "Assets/TestSceneSource";
+    const string PackageSample = "Assets/SimpleXRDeviceSimulator/Samples~/Test Scene";
     const string ControlsPrefab = "Assets/SimpleXRDeviceSimulator/Simple XR Device Simulator.prefab";
 
     static Material defaultMaterial;
@@ -156,9 +156,9 @@ static class BuildSampleScene
         var controls = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(ControlsPrefab));
         controls.GetComponent<EditorMouseClickTester>().showInputLabel = true;
 
-        EditorSceneManager.SaveScene(scene, Folder + "/Basic Scene.unity");
+        EditorSceneManager.SaveScene(scene, Folder + "/Simple XR Device Simulator Test Scene.unity");
         CopyToPackage();
-        Debug.Log("Saved " + Folder + "/Basic Scene.unity and copied it to " + PackageSample);
+        Debug.Log("Saved " + Folder + "/Simple XR Device Simulator Test Scene.unity and copied it to " + PackageSample);
     }
 
     static void CopyToPackage()

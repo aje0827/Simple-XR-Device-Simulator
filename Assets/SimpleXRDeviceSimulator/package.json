@@ -20,9 +20,9 @@
   "license": "MIT",
   "samples": [
     {
-      "displayName": "Basic Scene",
+      "displayName": "Test Scene",
       "description": "A table, a cube to grab, a Reset button and three teleport spots, with the controls already in the scene and listed on a panel. Open the scene and press Play.",
-      "path": "Samples~/Basic Scene"
+      "path": "Samples~/Test Scene"
     }
   ]
 }

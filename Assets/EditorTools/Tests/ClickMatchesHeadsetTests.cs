@@ -12,7 +12,7 @@ using SimpleXRDeviceSimulator;
 
 public class ClickMatchesHeadsetTests
 {
-    const string ScenePath = "Assets/BasicSceneSource/Basic Scene.unity";
+    const string ScenePath = "Assets/TestSceneSource/Simple XR Device Simulator Test Scene.unity";
 
     IEnumerator Load()
     {

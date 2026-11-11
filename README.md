@@ -30,7 +30,7 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 
 
-**Try it:** click **Tools > Simple XR Device Simulator > Open Basic Scene** and press Play. The controls are listed on a panel in the scene.
+**Try it:** click **Tools > Simple XR Device Simulator > Open Test Scene** and press Play. The controls are listed on a panel in the scene.
 
 **Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera and the event system on its own. It only runs in the Editor, so it has no effect on a headset build.
 

@@ -5,6 +5,7 @@
 ### Changed
 - The package folder is now `Assets/SimpleXRDeviceSimulator`, so the install link ends in `?path=Assets/SimpleXRDeviceSimulator`.
 - The namespace is now `SimpleXRDeviceSimulator` (was `XREditorControls`). Code that uses the package needs its `using` line changed.
+- The sample is now called Test Scene, opened with Tools > Simple XR Device Simulator > Open Test Scene (was Basic Scene).
 
 ## [2.1.1] - 2026-11-03
 
