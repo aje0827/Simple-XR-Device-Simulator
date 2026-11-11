@@ -8,7 +8,8 @@ namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// Editor-only controller for testing an XR scene without a headset. The mouse is the controller's
-    /// pointer: a left click is the trigger, Command is the grip, the right button is the thumbstick, 1 and 2 are A and B.
+    /// pointer: a left click is the trigger, Command is the grip, the right button is the thumbstick, 1 and 2 are A and B
+    /// (X and Y on the left hand). H switches between the right and left controller.
     /// The left button does only what the trigger does and Command only what the grip does, through the XR
     /// Interaction Toolkit's own ray, so what works here works in the headset and what is broken there is
     /// broken here. Interactables need nothing added.
@@ -22,6 +23,9 @@ namespace SimpleXRDeviceSimulator
     {
         [Header("Settings")]
         public bool enableMouseTesting = true;
+
+        [Tooltip("Use the mouse as the left controller instead of the right. Press H in Play mode to switch. On the left hand, 1 and 2 are X and Y.")]
+        public bool leftHand = false;
 
         [Tooltip("Degrees a held object turns per pixel of mouse movement while Command and Control are held. Left and right spin it. Up and down tilt it. Add Shift to roll it.")]
         public float grabTurnSpeed = 0.3f;
@@ -46,7 +50,7 @@ namespace SimpleXRDeviceSimulator
         [Tooltip("Draw a laser from a 'hand' near the camera to where the mouse points, like a controller ray.")]
         public bool showLaser = true;
         public float laserWidth = 0.004f;
-        [Tooltip("Where the laser starts: right, down and forward from the camera.")]
+        [Tooltip("Where the laser starts: right, down and forward from the camera. Mirrored to the left for the left hand.")]
         public Vector3 laserHandOffset = new Vector3(0.12f, -0.12f, 0.15f);
         [Tooltip("Points in the curved arc shown while aiming a teleport.")]
         public int arcSegments = 24;
@@ -67,6 +71,9 @@ namespace SimpleXRDeviceSimulator
         public bool logWorldHits = false;
         [Tooltip("Write each UI click to the Console.")]
         public bool logUIHits = false;
+
+        /// <summary>Where the hand sits from the camera: the laser offset, mirrored to the left for the left hand.</summary>
+        public Vector3 HandOffset => leftHand ? new Vector3(-laserHandOffset.x, laserHandOffset.y, laserHandOffset.z) : laserHandOffset;
 
         /// <summary>The last UI control the XR UI Input Module clicked. Empty until a click lands.</summary>
         public static string lastUiClick;
@@ -151,12 +158,12 @@ namespace SimpleXRDeviceSimulator
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
-            pointer = new MousePointer(mainCamera) { HandOffset = laserHandOffset };
+            pointer = new MousePointer(mainCamera) { HandOffset = HandOffset };
             ui = new MouseUiClick(this);
             locomotion = new MouseLocomotion(this, pointer);
             grab = new MouseGrab(this, pointer);
             laser = new MouseLaser(this, pointer, locomotion, grab);
-            inputLabel = new MouseInputLabel(grab);
+            inputLabel = new MouseInputLabel(this, grab);
 #if ENABLE_VR
             faceButtons = new MouseFaceButtons();
 #endif
@@ -175,6 +182,13 @@ namespace SimpleXRDeviceSimulator
 
             StopGazeSelect();
             ui.KeepMouseOffXrModule();
+
+            if (EditorControlsInput.SwitchHandPressedThisFrame)
+            {
+                leftHand = !leftHand;
+                Debug.Log("[Simple XR Device Simulator] The mouse is now the " + (leftHand ? "left" : "right") + " controller.");
+            }
+            pointer.HandOffset = HandOffset;
 
             // The toolkit reads the trigger a frame after it's set, so a press and release in the same frame
             // (a scripted click) lets go one frame later, or the press would never be seen.
@@ -205,7 +219,7 @@ namespace SimpleXRDeviceSimulator
             grab.Update();
             locomotion.Update(grab.Held != null);
 #if ENABLE_VR
-            faceButtons.Update();
+            faceButtons.Update(leftHand);
 #endif
 
             if (showInputLabel)

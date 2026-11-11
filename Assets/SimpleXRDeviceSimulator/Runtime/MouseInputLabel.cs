@@ -16,6 +16,7 @@ namespace SimpleXRDeviceSimulator
         const float LingerSeconds = 0.7f;
         const float RingSeconds = 0.5f;
 
+        readonly EditorMouseClickTester owner;
         readonly MouseGrab grab;
 
         string text;
@@ -29,8 +30,9 @@ namespace SimpleXRDeviceSimulator
         float ringStarted = -1f;
         Color ringColor;
 
-        public MouseInputLabel(MouseGrab grab)
+        public MouseInputLabel(EditorMouseClickTester owner, MouseGrab grab)
         {
+            this.owner = owner;
             this.grab = grab;
         }
 
@@ -146,10 +148,12 @@ namespace SimpleXRDeviceSimulator
                 return "←  Turn left";
             if (EditorControlsInput.ArrowHeld(KeyCode.RightArrow))
                 return "→  Turn right";
+            if (EditorControlsInput.SwitchHandHeld)
+                return owner.leftHand ? "H  Left hand" : "H  Right hand";
             if (EditorControlsInput.PrimaryButtonHeld)
-                return "1  A button";
+                return owner.leftHand ? "1  X button" : "1  A button";
             if (EditorControlsInput.SecondaryButtonHeld)
-                return "2  B button";
+                return owner.leftHand ? "2  Y button" : "2  B button";
             return null;
         }
 

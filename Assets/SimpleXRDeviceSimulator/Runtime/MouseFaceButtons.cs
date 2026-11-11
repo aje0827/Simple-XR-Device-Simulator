@@ -1,85 +1,90 @@
 // Simple XR Device Simulator: https://github.com/aje0827/Simple-XR-Device-Simulator
 // Copied into a project? Change the original in this repo, not the copy.
 #if UNITY_EDITOR && ENABLE_VR
-using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
 
 namespace SimpleXRDeviceSimulator
 {
     /// <summary>
-    /// The right controller's A and B buttons: hold 1 for A, 2 for B. They are pressed on a stand-in right
-    /// controller in the Input System, so anything bound to <c>&lt;XRController&gt;{RightHand}/primaryButton</c> or
-    /// <c>secondaryButton</c> works unchanged. The stand-in reports itself as not tracked, so the rig doesn't switch
-    /// its controllers on. With a headset connected, its real controller is used and nothing is added.
+    /// The controller's face buttons: hold 1 for A, 2 for B on the right hand, or X and Y on the left hand. They are
+    /// pressed on a stand-in controller in the Input System, so anything bound to
+    /// <c>&lt;XRController&gt;{RightHand}/primaryButton</c>, <c>{LeftHand}/primaryButton</c> or the secondary buttons
+    /// works unchanged. The stand-in reports itself as not tracked, so the rig doesn't switch its controllers on.
+    /// With a headset connected, its real controllers are used and nothing is added.
     /// </summary>
     internal sealed class MouseFaceButtons
     {
-        XRSimulatedController controller;
-        XRSimulatedControllerState state;
+        readonly Hand right = new Hand("Simple XR Device Simulator Right Controller", CommonUsages.RightHand);
+        readonly Hand left = new Hand("Simple XR Device Simulator Left Controller", CommonUsages.LeftHand);
         bool checkedHeadset;
+        bool headset;
 
-        public void Update()
+        public void Update(bool leftHand)
         {
-            bool a = EditorControlsInput.PrimaryButtonHeld && !TypingInTextField();
-            bool b = EditorControlsInput.SecondaryButtonHeld && !TypingInTextField();
-            if (controller == null)
+            bool primary = EditorControlsInput.PrimaryButtonHeld && !EditorControlsInput.TypingInTextField();
+            bool secondary = EditorControlsInput.SecondaryButtonHeld && !EditorControlsInput.TypingInTextField();
+            if ((primary || secondary) && !checkedHeadset)
             {
-                if (!a && !b)
-                    return;
-                if (!checkedHeadset)
-                {
-                    checkedHeadset = true;
-                    if (UnityEngine.XR.XRSettings.isDeviceActive)
-                        return;
-                    Add();
-                }
-                if (controller == null)
-                    return;
+                checkedHeadset = true;
+                headset = UnityEngine.XR.XRSettings.isDeviceActive;
             }
-
-            bool wasA = state.HasButton(ControllerButton.PrimaryButton);
-            bool wasB = state.HasButton(ControllerButton.SecondaryButton);
-            if (a == wasA && b == wasB)
+            if (headset)
                 return;
-            state = state.WithButton(ControllerButton.PrimaryButton, a).WithButton(ControllerButton.SecondaryButton, b);
-            InputSystem.QueueStateEvent(controller, state);
+
+            // Switching hands lets go of whatever the other hand was pressing.
+            Hand active = leftHand ? left : right;
+            Hand other = leftHand ? right : left;
+            other.Set(false, false);
+            active.Set(primary, secondary);
         }
 
         public void Remove()
         {
-            if (controller != null && controller.added)
-                InputSystem.RemoveDevice(controller);
-            controller = null;
+            right.Remove();
+            left.Remove();
         }
 
-        void Add()
+        sealed class Hand
         {
-            controller = InputSystem.AddDevice<XRSimulatedController>("Simple XR Device Simulator Right Controller");
-            InputSystem.SetDeviceUsage(controller, UnityEngine.InputSystem.CommonUsages.RightHand);
-            state = new XRSimulatedControllerState();
-            state.Reset();
-        }
+            readonly string name;
+            readonly InternedString usage;
+            XRSimulatedController controller;
+            XRSimulatedControllerState state;
 
-        // Typing a 1 or a 2 into a text field isn't pressing a button.
-        static bool TypingInTextField()
-        {
-            GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
-            if (selected == null)
-                return false;
-            InputField field = selected.GetComponent<InputField>();
-            if (field != null)
-                return field.isFocused;
-            foreach (Component component in selected.GetComponents<Component>())
+            public Hand(string name, InternedString usage)
             {
-                if (component == null || component.GetType().Name != "TMP_InputField")
-                    continue;
-                var focused = component.GetType().GetProperty("isFocused");
-                return focused != null && (bool)focused.GetValue(component);
+                this.name = name;
+                this.usage = usage;
             }
-            return false;
+
+            public void Set(bool primary, bool secondary)
+            {
+                if (controller == null)
+                {
+                    if (!primary && !secondary)
+                        return;
+                    controller = InputSystem.AddDevice<XRSimulatedController>(name);
+                    InputSystem.SetDeviceUsage(controller, usage);
+                    state = new XRSimulatedControllerState();
+                    state.Reset();
+                }
+
+                bool wasPrimary = state.HasButton(ControllerButton.PrimaryButton);
+                bool wasSecondary = state.HasButton(ControllerButton.SecondaryButton);
+                if (primary == wasPrimary && secondary == wasSecondary)
+                    return;
+                state = state.WithButton(ControllerButton.PrimaryButton, primary).WithButton(ControllerButton.SecondaryButton, secondary);
+                InputSystem.QueueStateEvent(controller, state);
+            }
+
+            public void Remove()
+            {
+                if (controller != null && controller.added)
+                    InputSystem.RemoveDevice(controller);
+                controller = null;
+            }
         }
     }
 }
