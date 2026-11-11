@@ -24,7 +24,7 @@ https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/SimpleXRDe
 
 Use this exact link. The page address from your browser won't install.
 
-To stay on one version, add its tag to the end of the link, like `#v3.0.1`. What changed in each version is in the [changelog](Assets/SimpleXRDeviceSimulator/CHANGELOG.md).
+To stay on one version, add its tag to the end of the link, like `#v3.1.0`. What changed in each version is in the [changelog](Assets/SimpleXRDeviceSimulator/CHANGELOG.md).
 
 If Unity asks to enable the Input System's backends and restart, click Yes. The package reads the mouse and keyboard through it.
 
@@ -37,11 +37,12 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 - Any scene with a camera, even an empty one. You don't need an XR rig to look around, click and grab. Teleporting and snap turning move the rig, so those two need an XR Origin rig in the scene.
 - One controller. Actions that take two hands in the headset, like scaling, get a key instead.
 - It acts like a real controller. A left click is the trigger and Command is the grip, so if a button or a grab doesn't work in the headset, it won't work here either. If your rig grabs with the trigger, a left click grabs too. When it finds a common setup problem, like UI the controller can't press, it tells you in the Console and the Game view.
-- The right controller's A and B buttons, on 1 and 2. Anything bound to the right controller's `primaryButton` or `secondaryButton` works as it is.
+- Either hand, one at a time. The mouse starts as the right controller. Press H to switch to the left, and again to switch back.
+- The A and B buttons on the right controller, and X and Y on the left, on 1 and 2. Anything bound to a controller's `primaryButton` or `secondaryButton` works as it is.
 
 ## Not supported
 
-- The left controller. The mouse is always the right controller, so the left controller's X and Y buttons have no key.
+- Both hands at once.
 - Hand tracking and climbing.
 - Rigs from outside the XR Interaction Toolkit, like Meta's Interaction SDK.
 
@@ -58,8 +59,9 @@ The mouse points the controller. A laser shows where it's pointing, and hover hi
 | Scale       | Command / Windows + scroll                   | Two-handed scale, within the limits set on the object's grab transformer |
 | Teleport    | Hold right click, then release               | Thumbstick forward, onto teleport anchors and areas. The arc turns red where you can't land |
 | Snap turn   | Left / Right arrow keys                      | Thumbstick left / right                                                  |
-| A button    | Hold 1                                       | A on the right controller                                                |
-| B button    | Hold 2                                       | B on the right controller                                                |
+| A / X       | Hold 1                                       | A on the right controller, X on the left                                 |
+| B / Y       | Hold 2                                       | B on the right controller, Y on the left                                 |
+| Switch hand | H                                            | Using your other hand. The laser moves to that side                      |
 
 On a Mac trackpad, a two-finger click is the right click and a two-finger swipe is the scroll. Other trackpads haven't been tested.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.1.0] - 2026-11-11
+
+### Added
+- H switches the mouse between the right and left controller. On the left hand, 1 and 2 press X and Y, and the laser starts from the left. A Left Hand box on the prefab sets which hand it starts on.
+
 ## [3.0.1] - 2026-11-11
 
 ### Fixed
