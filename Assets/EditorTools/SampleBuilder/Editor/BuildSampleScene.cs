@@ -124,6 +124,7 @@ static class BuildSampleScene
             { "Scale it", "Command / Windows + scroll" },
             { "Teleport", "Hold right click, release" },
             { "Snap turn", "Left / Right arrows" },
+            { "Switch hands", "H" },
             { "A button (lights the cube)", "1" },
             { "B button (hides the cube)", "2" },
         };
