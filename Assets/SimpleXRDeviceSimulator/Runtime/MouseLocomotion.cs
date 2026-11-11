@@ -91,14 +91,14 @@ namespace SimpleXRDeviceSimulator
             SetArcTarget(null);
         }
 
-        /// <summary>What a teleport ray would land on: a teleport spot (snapped to its landing point) or a teleport floor.</summary>
+        /// <summary>What a teleport ray would land on: a teleport spot (snapped to its landing point) or a teleport floor, including a floor whose Teleportation Area sits on another object.</summary>
         public bool TryGetTarget(Ray ray, out BaseTeleportationInteractable target, out Vector3 landing)
         {
             target = null;
             landing = Vector3.zero;
             if (!pointer.Raycast(ray, out RaycastHit hit))
                 return false;
-            target = hit.collider.GetComponentInParent<BaseTeleportationInteractable>();
+            target = MousePointer.FindInteractable<BaseTeleportationInteractable>(hit.collider);
             if (target == null)
                 return false;
             landing = hit.point;
