@@ -24,6 +24,8 @@ https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/SimpleXRDe
 
 Use this exact link. The page address from your browser won't install.
 
+To stay on one version, add its tag to the end of the link, like `#v3.0.0`. What changed in each version is in the [changelog](Assets/SimpleXRDeviceSimulator/CHANGELOG.md).
+
 If Unity asks to enable the Input System's backends and restart, click Yes. The package reads the mouse and keyboard through it.
 
 
