@@ -32,6 +32,8 @@ If Unity asks to enable the Input System's backends and restart, click Yes. The 
 
 **Use it in your scene:** drag `Simple XR Device Simulator.prefab` (under **Packages > Simple XR Device Simulator**) into your scene and press Play. It finds the camera and the event system on its own. It only runs in the Editor, so it has no effect on a headset build.
 
+It's free. If it saves you some headset time, you can [buy me a coffee](https://ko-fi.com/aje0827).
+
 ## What it supports
 
 - Any scene with a camera, even an empty one. You don't need an XR rig to look around, click and grab. Teleporting and snap turning move the rig, so those two need an XR Origin rig in the scene.
@@ -73,10 +75,6 @@ Recording a demo? Turn on **Show Input Label** on the prefab. It shows the contr
 - A camera in the scene. Teleporting and snap turning also need an XR Origin rig
 - The XR Interaction Toolkit 3.x and the Input System. Package Manager installs both with this package if they're missing
 - Built and tested on macOS. On Windows, the Windows key takes the place of Command. Windows hasn't been tested yet
-
-## Support
-
-It's free. If it saves you some headset time, you can [buy me a coffee](https://ko-fi.com/aje0827).
 
 ## License
 
