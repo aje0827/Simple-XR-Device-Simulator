@@ -19,7 +19,7 @@ It works with the XR Interaction Toolkit interactables and UI already in your sc
 In Unity, open **Window > Package Manager**, click **+**, choose **Add package from git URL**, and paste this link:
 
 ```
-https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/EditorTools/EditorControls
+https://github.com/aje0827/Simple-XR-Device-Simulator.git?path=Assets/SimpleXRDeviceSimulator
 ```
 
 Use this exact link. The page address from your browser won't install.

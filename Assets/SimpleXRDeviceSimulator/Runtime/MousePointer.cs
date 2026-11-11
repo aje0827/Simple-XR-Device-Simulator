@@ -11,7 +11,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using Object = UnityEngine.Object;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// The mouse as a controller pointer: the ray from the camera through the cursor, what it hits, and the

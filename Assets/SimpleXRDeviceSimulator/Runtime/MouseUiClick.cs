@@ -9,7 +9,7 @@ using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using Object = UnityEngine.Object;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// UI panels. The controls don't press UI themselves: the left button is the pointer's trigger, and the

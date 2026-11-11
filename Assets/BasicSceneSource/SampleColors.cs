@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace XREditorControls.Sample
+namespace SimpleXRDeviceSimulator.Sample
 {
     /// <summary>
     /// Gives an object the render pipeline's own default material and a color, so the sample looks right in the

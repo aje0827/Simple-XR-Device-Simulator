@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 #endif
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// Hold Alt and move the mouse to look around.

@@ -7,7 +7,7 @@ using UnityEditor.PackageManager.UI;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// The menu item that opens this package's Basic Scene sample, importing it first if it isn't imported yet.

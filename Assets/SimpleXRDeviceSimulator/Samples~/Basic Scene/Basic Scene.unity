@@ -3102,7 +3102,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1821582781}
-        m_TargetAssemblyTypeName: XREditorControls.Sample.SampleActions, Assembly-CSharp
+        m_TargetAssemblyTypeName: SimpleXRDeviceSimulator.Sample.SampleActions, Assembly-CSharp
         m_MethodName: ResetCube
         m_Mode: 0
         m_Arguments:

@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// The right controller's A and B buttons: hold 1 for A, 2 for B. They are pressed on a stand-in right

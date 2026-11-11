@@ -1,6 +1,6 @@
 {
-    "name": "XREditorControls",
-    "rootNamespace": "XREditorControls",
+    "name": "SimpleXRDeviceSimulator",
+    "rootNamespace": "SimpleXRDeviceSimulator",
     "references": [
         "Unity.XR.Interaction.Toolkit",
         "Unity.XR.CoreUtils",

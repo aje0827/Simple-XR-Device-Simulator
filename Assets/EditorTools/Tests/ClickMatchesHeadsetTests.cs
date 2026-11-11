@@ -8,11 +8,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
-using XREditorControls;
+using SimpleXRDeviceSimulator;
 
 public class ClickMatchesHeadsetTests
 {
-    const string ScenePath = "Assets/XREditorControlsSample/Basic Scene.unity";
+    const string ScenePath = "Assets/BasicSceneSource/Basic Scene.unity";
 
     IEnumerator Load()
     {

@@ -1,5 +1,5 @@
-// Builds the package's "Basic Scene" sample. Not part of the package: it lives outside EditorControls.
-// Run Tools > Simple XR Device Simulator > Build Sample Scene. It saves the scene in Assets/XREditorControlsSample and
+// Builds the package's "Basic Scene" sample. Not part of the package: it lives outside the package folder.
+// Run Tools > Simple XR Device Simulator > Build Sample Scene. It saves the scene in Assets/BasicSceneSource and
 // copies that folder, .meta files included, into the package's Samples~/Basic Scene for the Samples tab.
 using UnityEditor;
 using UnityEditor.Events;
@@ -16,14 +16,14 @@ using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
 using UnityEngine.XR.Interaction.Toolkit.Transformers;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using Unity.XR.CoreUtils;
-using XREditorControls;
-using XREditorControls.Sample;
+using SimpleXRDeviceSimulator;
+using SimpleXRDeviceSimulator.Sample;
 
 static class BuildSampleScene
 {
-    const string Folder = "Assets/XREditorControlsSample";
-    const string PackageSample = "Assets/EditorTools/EditorControls/Samples~/Basic Scene";
-    const string ControlsPrefab = "Assets/EditorTools/EditorControls/Simple XR Device Simulator.prefab";
+    const string Folder = "Assets/BasicSceneSource";
+    const string PackageSample = "Assets/SimpleXRDeviceSimulator/Samples~/Basic Scene";
+    const string ControlsPrefab = "Assets/SimpleXRDeviceSimulator/Simple XR Device Simulator.prefab";
 
     static Material defaultMaterial;
 

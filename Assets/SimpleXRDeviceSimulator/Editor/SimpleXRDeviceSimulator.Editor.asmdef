@@ -1,6 +1,6 @@
 {
-    "name": "XREditorControls.Editor",
-    "rootNamespace": "XREditorControls",
+    "name": "SimpleXRDeviceSimulator.Editor",
+    "rootNamespace": "SimpleXRDeviceSimulator",
     "references": [],
     "includePlatforms": [
         "Editor"

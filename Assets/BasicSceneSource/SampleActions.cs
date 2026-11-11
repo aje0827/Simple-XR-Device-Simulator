@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace XREditorControls.Sample
+namespace SimpleXRDeviceSimulator.Sample
 {
     /// <summary>
     /// The sample's Reset button: puts the cube back where it started, at its starting size.

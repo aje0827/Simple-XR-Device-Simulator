@@ -9,7 +9,7 @@ using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
 using Object = UnityEngine.Object;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// The thumbstick: hold the right mouse button to aim a teleport arc and let go to jump, and the left and

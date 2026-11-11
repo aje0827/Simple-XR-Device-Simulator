@@ -2,7 +2,7 @@
 // Copied into a project? Change the original in this repo, not the copy.
 using UnityEngine;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// One frame of the editor pointer, set by a script (for example an automated UI check).

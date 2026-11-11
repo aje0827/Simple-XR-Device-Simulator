@@ -3,7 +3,7 @@
 #if UNITY_EDITOR
 using UnityEngine;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// A label in the corner of the Game view naming the control in use, like "⌘ Grab" or "⌘ Ctrl Turn", plus a

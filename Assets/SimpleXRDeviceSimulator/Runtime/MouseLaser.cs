@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
-namespace XREditorControls
+namespace SimpleXRDeviceSimulator
 {
     /// <summary>
     /// The laser you see in the Game view: a line from a "hand" near the camera to where the mouse points,

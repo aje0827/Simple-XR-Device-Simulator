@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace XREditorControls.Sample
+namespace SimpleXRDeviceSimulator.Sample
 {
     /// <summary>
     /// The sample's A and B buttons, read from the right controller the way an app reads them: the cube lights up
